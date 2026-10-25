@@ -53,7 +53,7 @@ fi
 printf '%s\n' "$sums" > "$OUT/SHA256SUMS"
 
 echo
-echo "Staged $(git describe --always --dirty) for ${BOARDS[*]} in $OUT"
+echo "Staged $(git log -1 --format='%h "%s"') for ${BOARDS[*]} in $OUT"
 echo "Publish with:"
 echo "  gh release create $TAG --repo fossuav/ardupilot-rp2350 --target $(git rev-parse HEAD) \\"
 echo "      --title \"<title>\" --notes-file <notes.md> $OUT/*"
