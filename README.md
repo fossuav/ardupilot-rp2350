@@ -191,10 +191,8 @@ These are the ones that matter when flying. The full list of open work is in the
 - On RPI_UAVFC the battery current input does not track load reliably, though voltage is accurate. Do not rely on current, consumed capacity or sag compensation, and leave `BATT_FS_VOLTSRC` at 0.
 - On RPI_UAVFC, `ESC_CALIBRATION` 2 or 3 makes the board reboot repeatedly. Calibrate ESCs with the throttle-high procedure.
 - The microSD write rate is limited by the RP2350, so high-rate logging drops messages, more so in position modes. Use the `ISBH`/`ISBD` batch sampler for spectral analysis and check `DSF.Dp` before trusting a logged rate.
-- Occasionally a log file is listed with a garbled name, such as `0000012B.IN` for `00000012.BIN`. The cause is not yet known.
 - RPI_UAVFC has no compass; attach one to the GPS connector's I2C bus.
 - On RPI_UAVFC the analog OSD and the LED strip share a PIO block, so the LED strip does not work with `OSD_TYPE` 6.
-- SBUS has not been tried with a receiver.
 
 ## Reporting Problems
 
