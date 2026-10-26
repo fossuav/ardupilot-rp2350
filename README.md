@@ -150,33 +150,33 @@ The branch is ArduPilot master as of 2026-10-24 with the RP2350 port and the fix
 
 ### The port
 
-- RP2350 Port (https://github.com/ArduPilot/ardupilot/pull/32995): ChibiOS SMP across both cores with the rate loop on core 1, hardware and PIO UARTs, PWM and PIO DShot with bidirectional DShot, the PIO analog OSD (`OSD_TYPE` 6), parameter storage in flash, the bootloader, and the Pico2, Laurel and RPI_UAVFC boards. It needs the RP2350 ChibiOS port (https://github.com/ArduPilot/ChibiOS/pull/113), which the `modules/ChibiOS` submodule carries.
+- RP2350 Port ([#32995](https://github.com/ArduPilot/ardupilot/pull/32995)): ChibiOS SMP across both cores with the rate loop on core 1, hardware and PIO UARTs, PWM and PIO DShot with bidirectional DShot, the PIO analog OSD (`OSD_TYPE` 6), parameter storage in flash, the bootloader, and the Pico2, Laurel and RPI_UAVFC boards. It needs the RP2350 ChibiOS port ([ChibiOS#113](https://github.com/ArduPilot/ChibiOS/pull/113)), which the `modules/ChibiOS` submodule carries.
 - Per-core load measurement that keeps running while `@SYS/threads.txt` is read - local to this branch, a fix to code the port adds, to be folded into it
 
 ### microSD and logging
 
-- Honour AP_FATFS_MAX_IO_SIZE on the microSD SPI Path (https://github.com/ArduPilot/ardupilot/pull/34476)
-- Write microSD Blocks in One SPI Exchange (https://github.com/ArduPilot/ardupilot/pull/34477), with its ChibiOS half (https://github.com/ArduPilot/ChibiOS/pull/115)
-- Recover microSD Parameter Storage after an I/O Error (https://github.com/ArduPilot/ardupilot/pull/34478)
-- Mark start_new_log() IO Steps for the IO Timer Watchdog (https://github.com/ArduPilot/ardupilot/pull/34473)
-- Clear Stale Bytes in @SYS Directory Names (https://github.com/ArduPilot/ardupilot/pull/33056)
+- Honour AP_FATFS_MAX_IO_SIZE on the microSD SPI Path ([#34476](https://github.com/ArduPilot/ardupilot/pull/34476))
+- Write microSD Blocks in One SPI Exchange ([#34477](https://github.com/ArduPilot/ardupilot/pull/34477)), with its ChibiOS half ([ChibiOS#115](https://github.com/ArduPilot/ChibiOS/pull/115))
+- Recover microSD Parameter Storage after an I/O Error ([#34478](https://github.com/ArduPilot/ardupilot/pull/34478))
+- Mark start_new_log() IO Steps for the IO Timer Watchdog ([#34473](https://github.com/ArduPilot/ardupilot/pull/34473))
+- Clear Stale Bytes in @SYS Directory Names ([#33056](https://github.com/ArduPilot/ardupilot/pull/33056))
 
 ### RC input
 
-- SBUS Framing Anchored on the Header, with Resync on Failure (https://github.com/ArduPilot/ardupilot/pull/33057)
-- Guard CRSF against Early Startup (https://github.com/ArduPilot/ardupilot/pull/33058)
+- SBUS Framing Anchored on the Header, with Resync on Failure ([#33057](https://github.com/ArduPilot/ardupilot/pull/33057))
+- Guard CRSF against Early Startup ([#33058](https://github.com/ArduPilot/ardupilot/pull/33058))
 
 ### Sensors and rate loop
 
-- DPS280/310/368 Poll Rate to Match the 32 Hz Sensor ODR (https://github.com/ArduPilot/ardupilot/pull/33055)
-- ICM-56686 Gyro UI Low-pass for Fast Sampling (https://github.com/ArduPilot/ardupilot/pull/34603)
-- Honour the Harmonic Notch Loop Rate Option in the Rate Thread (https://github.com/ArduPilot/ardupilot/pull/34436)
+- DPS280/310/368 Poll Rate to Match the 32 Hz Sensor ODR ([#33055](https://github.com/ArduPilot/ardupilot/pull/33055))
+- ICM-56686 Gyro UI Low-pass for Fast Sampling ([#34603](https://github.com/ArduPilot/ardupilot/pull/34603))
+- Honour the Harmonic Notch Loop Rate Option in the Rate Thread ([#34436](https://github.com/ArduPilot/ardupilot/pull/34436))
 
 ### Ground station and OSD
 
-- Wake the MAVLink FTP Worker When a Request Is Queued (https://github.com/ArduPilot/ardupilot/pull/34474) - the branch carries the first version; the PR has since added a timeout that closes a session whose reply cannot be sent
-- No Hole in the OSD Backend List (https://github.com/ArduPilot/ardupilot/pull/34497)
-- Count Unallocated Core Memory in @SYS/memory.txt (https://github.com/ArduPilot/ardupilot/pull/34530)
+- Wake the MAVLink FTP Worker When a Request Is Queued ([#34474](https://github.com/ArduPilot/ardupilot/pull/34474)) - the branch carries the first version; the PR has since added a timeout that closes a session whose reply cannot be sent
+- No Hole in the OSD Backend List ([#34497](https://github.com/ArduPilot/ardupilot/pull/34497))
+- Count Unallocated Core Memory in @SYS/memory.txt ([#34530](https://github.com/ArduPilot/ardupilot/pull/34530))
 
 ## Known Limitations
 
