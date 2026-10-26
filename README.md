@@ -68,12 +68,13 @@ The 4 MB of flash on an RP2350 board holds three things: the ArduPilot bootloade
 
 ### 1. Put the board in BOOTSEL mode
 
-In BOOTSEL mode the RP2350 appears on your computer as a USB drive named `RP2350`.
+Hold the board's BOOT button (BOOTSEL on a Pico 2) while you plug in USB. The RP2350 appears on your computer as a USB drive named `RP2350`.
 
-- Pico 2: hold the BOOTSEL button while you plug in USB.
-- Laurel: hold BOOT and press RESET.
-- RPI_UAVFC running Betaflight: connect with Betaflight Configurator, open the CLI tab and enter `bl`.
-- Any board whose flash is empty enters BOOTSEL by itself when it is powered.
+There are other ways in, if the button is hard to reach:
+
+- Laurel: with USB connected, hold BOOT and press RESET.
+- A board running Betaflight: connect with Betaflight Configurator, open the CLI tab and enter `bl`.
+- A board whose flash is empty enters BOOTSEL by itself when it is powered.
 
 ### 2. Install the ArduPilot bootloader
 
@@ -95,7 +96,7 @@ On Linux it finds the board by itself; on Windows or macOS add `--port COM5` or 
 
 A ground station can load the same `.apj`: in Mission Planner use Install Firmware, Load custom firmware; in QGroundControl use Vehicle Setup, Firmware, Advanced settings, Custom firmware file. If the ground station gives up with a timeout while erasing or verifying, use `uploader.py`.
 
-On a Pico 2 or Laurel you can instead enter BOOTSEL again and copy the firmware's `.uf2` to the drive.
+Or enter BOOTSEL again and copy `<board>_arducopter.uf2` to the drive.
 
 The board then starts ArduPilot and appears as a USB serial port (`usb-ArduPilot_<board>_<serial>-if00` on Linux) carrying MAVLink. Connect your ground station to it and configure the vehicle as for any other ArduPilot board, starting from the board's README. On a cold power-up the bootloader waits briefly for an upload before starting ArduPilot: 3 seconds on RPI_UAVFC and Laurel, 15 seconds on Pico2.
 
