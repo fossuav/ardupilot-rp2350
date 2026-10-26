@@ -1,7 +1,5 @@
-# ArduPilot for Raspberry Pi RP2350
-
 <!-- markdownlint-disable-next-line MD033 -->
-<a href="https://www.raspberrypi.com"><img src="https://www.raspberrypi.com/app/uploads/2022/02/COLOUR-Raspberry-Pi-Symbol-Registered.png" alt="Raspberry Pi" width="100" align="right"></a>
+# ArduPilot for Raspberry Pi RP2350 <a href="https://www.raspberrypi.com"><img src="https://www.raspberrypi.com/app/uploads/2022/02/COLOUR-Raspberry-Pi-Symbol-Registered.png" alt="Raspberry Pi" height="48"></a>
 
 The canonical ArduPilot README can be found [here](https://github.com/ArduPilot/ardupilot/blob/master/README.md)
 
