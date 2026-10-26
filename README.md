@@ -1,5 +1,8 @@
 # ArduPilot for Raspberry Pi RP2350
 
+<!-- markdownlint-disable-next-line MD033 -->
+<a href="https://www.raspberrypi.com"><img src="https://www.raspberrypi.com/app/uploads/2022/02/COLOUR-Raspberry-Pi-Symbol-Registered.png" alt="Raspberry Pi" width="100" align="right"></a>
+
 The canonical ArduPilot README can be found [here](https://github.com/ArduPilot/ardupilot/blob/master/README.md)
 
 ![Raspberry Pi UAV Flight Controller](libraries/AP_HAL_ChibiOS/hwdef/RPI_UAVFC/RPI_UAVFC_Top.jpg)
@@ -213,3 +216,5 @@ License, version 3 or (at your option) any later version.
 - [Overview of license](https://ardupilot.org/dev/docs/license-gplv3.html)
 
 - [Full Text](https://github.com/ArduPilot/ardupilot/blob/master/COPYING.txt)
+
+Raspberry Pi is a trademark of Raspberry Pi Ltd.
