@@ -48,7 +48,7 @@ RC input is on SERIAL3, the RADIO connector, which defaults to
 - SRXL2 requires `SERIAL3_OPTIONS` = 4, and connects only the TX pin
 - SBUS requires `SERIAL3_OPTIONS` = 1 (the port inverts the pad itself).
   It also needs ArduPilot/ardupilot#33057, without which frames are
-  dropped, and has not yet been run with a receiver.
+  dropped.
 
 The board's separate SBUS pad on the DVTX connector is not used.
 
@@ -150,16 +150,18 @@ requested message rates.
 Firmware for this board can be found [here](https://firmware.ardupilot.org)
 in sub-folders labeled "RPI_UAVFC".
 
-To install the bootloader the first time, write
-`Tools/bootloaders/RPI_UAVFC_bl.bin` at 0x10000000 over SWD (see
-`libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md`), or start the RP2350 ROM
-bootloader and either copy `Tools/bootloaders/RPI_UAVFC_bl.uf2` to the drive
-that appears or, with `picotool` on the path, run:
+To install the bootloader the first time, hold the `BOOT` button while
+plugging in USB to start the RP2350 ROM bootloader, then either copy
+`Tools/bootloaders/RPI_UAVFC_bl.uf2` to the drive that appears or, with
+`picotool` on the path, run:
 
 ```bash
 ./waf configure --board RPI_UAVFC --bootloader
 ./waf bootloader --upload
 ```
+
+Alternatively, write `Tools/bootloaders/RPI_UAVFC_bl.bin` at 0x10000000
+over SWD (see `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md`).
 
 Once the bootloader is installed, load the `*.apj` firmware with any
 ArduPilot ground station.
