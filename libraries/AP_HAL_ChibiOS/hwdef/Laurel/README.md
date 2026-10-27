@@ -96,8 +96,9 @@ Build the firmware with:
 ./waf copter
 ```
 
-To install the bootloader the first time, hold `BOOT` and press `RESET` to
-start the RP2350 ROM bootloader, then either copy
+To install the bootloader the first time, hold `BOOT` while plugging in
+USB, or hold `BOOT` and press `RESET`, to start the RP2350 ROM bootloader,
+then either copy
 `Tools/bootloaders/Laurel_bl.uf2` to the drive that appears, or, with
 `picotool` on the path, run:
 
