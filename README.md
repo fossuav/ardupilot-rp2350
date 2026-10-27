@@ -148,12 +148,13 @@ The bootloaders are prebuilt in `Tools/bootloaders/`, and the firmware build emb
 
 ## What Is Included
 
-The branch is ArduPilot master as of 2026-10-24 with the RP2350 port and the fixes below on top. All but one are open pull requests to ArduPilot. Releases are built by `Tools/RP2350/build_release.sh`; [Tools/RP2350/README.md](Tools/RP2350/README.md) describes how the branch and its releases are kept.
+The branch is ArduPilot master as of 2026-10-24 with the RP2350 port and the fixes below on top. All of them are open pull requests to ArduPilot except the two entries marked local, which are fixes to the port waiting to be folded into it. Releases are built by `Tools/RP2350/build_release.sh`; [Tools/RP2350/README.md](Tools/RP2350/README.md) describes how the branch and its releases are kept.
 
 ### The port
 
 - RP2350 Port ([#32995](https://github.com/ArduPilot/ardupilot/pull/32995)): ChibiOS SMP across both cores with the rate loop on core 1, hardware and PIO UARTs, PWM and PIO DShot with bidirectional DShot, the PIO analog OSD (`OSD_TYPE` 6), parameter storage in flash, the bootloader, and the Pico2, Laurel and RPI_UAVFC boards. It needs the RP2350 ChibiOS port ([ChibiOS#113](https://github.com/ArduPilot/ChibiOS/pull/113)), which the `modules/ChibiOS` submodule carries.
-- Per-core load measurement that keeps running while `@SYS/threads.txt` is read - local to this branch, a fix to code the port adds, to be folded into it
+- Per-core load measurement that keeps running while `@SYS/threads.txt` is read - local
+- Corrections to the port's board READMEs and developer notes from testing: entering BOOTSEL with the BOOT button, SBUS run with a receiver, garbled log file names no longer seen - local
 
 ### microSD and logging
 
