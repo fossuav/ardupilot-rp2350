@@ -139,9 +139,10 @@ is at the top of flash and reserves everything above it, leaving no app area.
 ### Flashing
 
 Use the ROM bootloader (BOOTSEL) for the first bootloader install and for
-recovery. To enter it on Pico2, hold BOOTSEL while plugging in USB. On
-Laurel, hold BOOT (SW1) and press RESET (SW2). A part with no valid image in
-flash also falls through to the ROM. Then copy
+recovery. To enter it, hold the board's BOOT button (BOOTSEL on Pico2)
+while plugging in USB; on Laurel, holding BOOT (SW1) and pressing RESET
+(SW2) also works. A part with no valid image in flash also falls through
+to the ROM. Then copy
 `Tools/bootloaders/<board>_bl.uf2` to the drive that appears, or, with
 picotool on `PATH`, run `./waf bootloader --upload` from a `--bootloader`
 configure. That runs `picotool load -v -x <uf2> -f` on a board that is
@@ -1634,14 +1635,14 @@ on a flight board comes from
   is CPU work. The logger also syncs every 4 KB on this branch, as
   `AP_FATFS_MAX_IO_SIZE` needs #34476 (see microSD). Open: land #34476,
   measure what position control offers at the source, cut core0 load.
-- Some log files come back named `0000012B.IN` for `00000012.BIN`: the
-  directory entry read one byte late, so the attribute byte, 0x20, becomes
-  the last extension character. Cause open. Ruled out: SPI receive overrun (the
-  sticky `RORRIS` flag stays 0 for hours), an XIP park stalling the read
-  (A/B on a const `dummytx`), the missing SPI abort (`internal_errors` 0).
-  It correlates with arm and disarm, when the entry is written. Next: the
-  bounce-buffer copy in `SPIDevice::do_transfer()`, and what the card does
-  with an interrupted directory-sector write.
+- Log files that came back named `0000012B.IN` for `00000012.BIN` (the
+  directory entry read one byte late, so the attribute byte, 0x20, became
+  the last extension character) are no longer seen. Which change fixed it
+  was not isolated. The RP SPI abort and receive-overrun detection in
+  ChibiOS (2026-09-07) fit the symptom, although measurements the next day
+  found neither path taken in normal running; the single-exchange block
+  write, ArduPilot/ChibiOS#115 with #34477, changed how directory sectors
+  are written. If it recurs, check the build has both.
 - The RP EFL driver reports success for a refused page program, so
   `stm32_flash_write()` reads back and retries. Whether programs ever need
   the retry is unknown; one counter on the mismatch answers it.
