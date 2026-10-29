@@ -1,0 +1,66 @@
+name: RP2350 build
+
+# This repository's own CI. Upstream ArduPilot's workflows are turned off
+# here by Tools/RP2350/disable_upstream_ci.sh, so a push runs only this:
+# Copter and the bootloader for each RP2350 board.
+
+on:
+  push:
+    branches: ['**']  # excludes tag pushes
+    paths-ignore:
+      - '**.md'
+      - '**.jpg'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - '**.jpg'
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    container: ardupilot/ardupilot-dev-chibios:v0.2.0
+    strategy:
+      fail-fast: false  # build every board even if one fails
+      matrix:
+        board: [RPI_UAVFC, Pico2, Laurel]
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: 'recursive'
+
+      - name: restore ccache
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.ccache
+          key: rp2350-ccache-${{ matrix.board }}-${{ github.run_id }}
+          restore-keys: rp2350-ccache-${{ matrix.board }}-
+
+      - name: build Copter and the bootloader for ${{ matrix.board }}
+        shell: bash
+        run: |
+          git config --global --add safe.directory ${GITHUB_WORKSPACE}
+          SETUP_CCACHE_MAX_SIZE=200M . .github/actions/setup-ccache/ccache.env
+          PATH="/usr/lib/ccache:/opt/gcc-arm-none-eabi-10/bin:$PATH"
+          ./waf configure --board ${{ matrix.board }}
+          ./waf copter
+          ./waf configure --board ${{ matrix.board }} --bootloader
+          ./waf bootloader
+          ccache -s
+
+      # one cache entry per board, written only by the release branch, as
+      # upstream writes only from master
+      - name: save ccache
+        if: github.event_name == 'push' && github.ref == 'refs/heads/ArduPilot-4.8-rp2350'
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.ccache
+          key: rp2350-ccache-${{ matrix.board }}-${{ github.run_id }}
