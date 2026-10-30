@@ -57,7 +57,7 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
 
 ## 2026-10-30 - release-testing flights on 1f8685e9
 
-Five logs from Andy's quad on `1f8685e9`, the tree this branch still has.
+Four logs from Andy's quad on `1f8685e9`, the tree this branch still has.
 The port was clean on every flight: rate loop 1600 Hz with a worst armed
 gap of 1.07 ms, no long loops, the IMU reaching the EKF every 5.00 ms,
 nothing dropped. No port runs half duplex, so #32995's commit 48 is still
