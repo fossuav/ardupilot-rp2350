@@ -38,6 +38,47 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   submodule has no pre-push hook.
 - A Renode test in this repository's CI, to add when Renode support for
   the RP2350 is incorporated.
+- R4 boards: measure the current input's disarmed zero at a cold boot and
+  warm, repeat a calibration flight and refit the quad's compass. Then
+  update the port's current-input text (`rp2350/DEVELOPMENT.md`, the
+  RPI_UAVFC README and `defaults.parm`'s comment), which describes only
+  the 82.5k R3 boards and now disagrees with the top-level README.
+- Until then, the quad's current-based compass compensation holds only
+  near the 11-19 degC board temperature it was fitted at; recheck it on a
+  warmer day.
+- The next release's notes: the current input and compass compensation
+  limitations the README now gives.
+- The OSD thread has 104 of 1504 bytes of stack free in every log
+  (`STAK`), with MSP DisplayPort in use. Not investigated.
+- Upstream, not the port: Copter's pre-failsafe yaw reset is served from
+  the GSF and fails the compass for the rest of the flight. On 2026-10-30
+  it fired mid-flip as the GSF lost track and left the yaw 110 degrees
+  wrong. Not raised upstream.
+
+## 2026-10-30 - release-testing flights on 1f8685e9
+
+Five logs from Andy's quad on `1f8685e9`, the tree this branch still has.
+The port was clean on every flight: rate loop 1600 Hz with a worst armed
+gap of 1.07 ms, no long loops, the IMU reaching the EKF every 5.00 ms,
+nothing dropped. No port runs half duplex, so #32995's commit 48 is still
+unflown.
+
+Flight 2 had three EKF failsafes in Acro and a lean. The compass caused
+them. Motor current left up to 480 mG of interference against a 150 mG
+horizontal field, because the current input read 5.8 times low and the old
+`COMPASS_MOT` was too small and misdirected besides. A pre-failsafe yaw
+reset then took the GSF's yaw mid-flip and locked the compass out.
+
+On this quad (a modified R3 and an iFlight BLITZ E55) the current input
+tracks load at 3.2-3.7 mV/A, on a zero that drifts 1.9-2.9 mV/degC with
+board temperature. With `BATT_AMP_PERVLT` 295, `BATT_AMP_OFFSET` 0.035 and
+the compass refitted from a calibration flight, Acro flew clean: no
+failsafe or yaw reset, and the compass within 7-9 degrees of the EKF's
+heading at every throttle, against 48-68 before. The top-level README's
+Known Limitations now give the current input's gain and drift, and their
+effect on compass motor compensation.
+
+Measurements in `../ardupilot-pr-analysis/32995/bench-2026-10-30.md`.
 
 ## 2026-10-29 - first flights on e45dae01b1, this repository's commits squashed
 
