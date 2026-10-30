@@ -70,8 +70,10 @@ horizontal field, because the current input read 5.8 times low and the old
 reset then took the GSF's yaw mid-flip and locked the compass out.
 
 On this quad (a modified R3 and an iFlight BLITZ E55) the current input
-tracks load at 3.2-3.7 mV/A, on a zero that drifts 1.9-2.9 mV/degC with
-board temperature. With `BATT_AMP_PERVLT` 295, `BATT_AMP_OFFSET` 0.035 and
+tracks load at 3.2-3.7 mV/A against the eRPM current model, on a zero
+that drifts 1.9-2.9 mV/degC with board temperature. The model read about
+30% low against the charger on 2026-10-29, so the true gain may be nearer
+2.4 mV/A; charger figures for these packs would settle it. With `BATT_AMP_PERVLT` 295, `BATT_AMP_OFFSET` 0.035 and
 the compass refitted from a calibration flight, Acro flew clean: no
 failsafe or yaw reset, and the compass within 7-9 degrees of the EKF's
 heading at every throttle, against 48-68 before. The top-level README's
