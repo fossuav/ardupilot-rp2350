@@ -18,8 +18,6 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   the local commits are its per-core form, which #32995's per-core
   measurement needs. They also change STM32 output, so they could not go
   into #32995's first 51 commits.
-- A release with the rebuilt bootloaders. `rp2350-20261027` ships the ones
-  from before #32995's fast erase and `GET_CRC` fixes of 2026-10-28.
 - Take #34474's current head. The branch carries its first version, without
   the timeout that closes an FTP session whose reply cannot be sent.
 - Untested: loading an `.apj` from Mission Planner or QGroundControl. This
@@ -43,23 +41,83 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   update the port's current-input text (`rp2350/DEVELOPMENT.md`, the
   RPI_UAVFC README and `defaults.parm`'s comment), which describes only
   the 82.5k R3 boards and now disagrees with the top-level README.
-- Until then, the quad's current-based compass compensation holds only
-  near the 11-19 degC board temperature it was fitted at; recheck it on a
-  warmer day.
-- The next release's notes: the current input and compass compensation
-  limitations the README now gives.
+- The quad's compass: its coupling to battery current fell by about a
+  third between 2026-10-30 and 2026-10-31, so the refitted `COMPASS_MOT`
+  now over-compensates. Find what changed on the airframe; once it is
+  fixed, fly a calibration flight with `COMPASS_MOTCT` 0 and refit.
+  Charger figures for the packs are still owed to anchor the current
+  scale.
 - The OSD thread has 104 of 1504 bytes of stack free in every log
   (`STAK`), with MSP DisplayPort in use. Not investigated.
 - Upstream, not the port: Copter's pre-failsafe yaw reset is served from
   the GSF and fails the compass for the rest of the flight. On 2026-10-30
   it fired mid-flip as the GSF lost track and left the yaw 110 degrees
-  wrong. Not raised upstream.
+  wrong; on 2026-10-31 the GSF was 16-35 degrees wrong in Loiter while
+  reporting 0.4-1.4 degrees of spread. Not raised upstream.
+- Log 7 of 2026-10-31 had a radio failsafe on the ground, 37 s after
+  disarming. Not investigated.
+
+## 2026-11-02 - rp2350-alpha1
+
+ArduCopter 4.8.0-dev for RPI_UAVFC and Pico2, built at `324af5281c` and
+published 2026-11-02 10:35 UTC as "ArduCopter 4.8.0-dev for RP2350 alpha1
+(2026-11-02)", with the same 16 files as `rp2350-20261027`. "alpha1" is
+the release's name only: the firmware reports `ArduCopter V4.8.0-dev
+(324af528)`. It is not marked pre-release, so `releases/latest` serves it.
+As before, it was created as a draft with `gh` and published from the
+GitHub page.
+
+`324af5281c` differs from `1f8685e9`, the build flown on 2026-10-29, 30
+and 31 (eleven flights in Stabilize, Alt Hold, Loiter and Acro), only in
+README.md and this file, so the release is the flown code. RTL, Auto, the
+GPS failsafe and #32995's commit 48 remain unflown.
+
+Since `rp2350-20261027` the firmware has changed only by #32995 moving
+from `1b8b7e68cf` to `e45dae01b1` (2026-10-28 below): the rebuilt
+bootloaders with the fast erase and `GET_CRC` fixes, the half-duplex PIO
+UART echo window, `@SYS/flash.bin` on the XIP window, and Pico2's
+defaults. Master, the follow-up PRs and the local commits are unchanged,
+and `uploader.py` is byte-identical to the last release's. The notes tell
+users to install the new bootloader when upgrading, and give the current
+input and compass compensation limitations from the README. They also say
+the flights had no long loops in any log, which holds only in flight: log
+7 of 2026-10-31 had one at the arming instant, on the ground.
+
+The ChibiOS pin is still `7e50cd016f`, the head of fossuav/ChibiOS
+`rp2350-releases` and tagged `rp2350-20261027` there, so nothing was
+pushed to it. The fresh-clone check of 2026-10-27, that a `git clone
+--recurse-submodules` builds byte-identical firmware, was not repeated;
+`build_release.sh` reused the existing build directories.
+
+## 2026-10-31 - release-testing flights on 1f8685e9
+
+Two logs, three flights, from Andy's quad on `1f8685e9`, with no parameter
+changed since the last flight of 2026-10-30. The port was clean again:
+rate loop 1600 Hz with a worst gap in flight of 1.05 ms, the IMU reaching
+the EKF every 5.00 ms, nothing dropped, no EKF failsafe or emergency yaw
+reset. Log 7's one long loop, and rate-loop gaps of 5-6 ms on two of the
+flights, come at the arming instant, on the ground at spin-arm: the
+parameter save that arming
+makes, which `AP_STORAGE_NO_WRITE_WHILE_ARMED` keeps out of flight.
+2026-10-30's flights show the same at arming (4.3-6.5 ms), which its
+"worst armed gap" missed by counting the flights only. Every
+`SERIALn_OPTIONS` is still 0, so commit 48 is still unflown.
+
+The compass was no longer compensated: in Acro it read 40 degrees and
+more off the EKF's heading at high throttle, against 6-10 the day before.
+Its coupling to battery current fell by about a third overnight while the
+current input's scale stayed the same, so 40-48% of what the refitted
+`COMPASS_MOT` applies is now excess. What changed on the airframe is not
+known. The EKF yaw stayed within about 6 degrees of true throughout,
+checked against GPS acceleration.
+
+Measurements in `../ardupilot-pr-analysis/32995/bench-2026-10-31.md`.
 
 ## 2026-10-30 - release-testing flights on 1f8685e9
 
 Four logs from Andy's quad on `1f8685e9`, the tree this branch still has.
-The port was clean on every flight: rate loop 1600 Hz with a worst armed
-gap of 1.07 ms, no long loops, the IMU reaching the EKF every 5.00 ms,
+The port was clean on every flight: rate loop 1600 Hz with a worst gap in
+flight of 1.07 ms, no long loops, the IMU reaching the EKF every 5.00 ms,
 nothing dropped. No port runs half duplex, so #32995's commit 48 is still
 unflown.
 
