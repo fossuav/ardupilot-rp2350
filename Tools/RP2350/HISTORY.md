@@ -67,6 +67,12 @@ the release's name only: the firmware reports `ArduCopter V4.8.0-dev
 As before, it was created as a draft with `gh` and published from the
 GitHub page.
 
+On 2026-11-04 the branch's history from 2026-10-29 onwards was rewritten
+to take an image out of the top-level README, and the tag was moved to
+`5548cfd4c3`. That commit differs from `324af5281c` only by the image and
+its README line, so the binaries, which were not rebuilt, still match it
+and still report `324af528`.
+
 `324af5281c` differs from `1f8685e9`, the build flown on 2026-10-29, 30
 and 31 (eleven flights in Stabilize, Alt Hold, Loiter and Acro), only in
 README.md and this file, so the release is the flown code. RTL, Auto, the
