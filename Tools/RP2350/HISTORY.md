@@ -59,24 +59,19 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
 
 ## 2026-11-02 - rp2350-alpha1
 
-ArduCopter 4.8.0-dev for RPI_UAVFC and Pico2, built at `324af5281c` and
+ArduCopter 4.8.0-dev for RPI_UAVFC and Pico2, tagged at `5548cfd4c3` and
 published 2026-11-02 10:35 UTC as "ArduCopter 4.8.0-dev for RP2350 alpha1
 (2026-11-02)", with the same 16 files as `rp2350-20261027`. "alpha1" is
 the release's name only: the firmware reports `ArduCopter V4.8.0-dev
-(324af528)`. It is not marked pre-release, so `releases/latest` serves it.
-As before, it was created as a draft with `gh` and published from the
-GitHub page.
+(324af528)`, the commit's ID when it was built, before the branch's
+history was rewritten on 2026-11-04. It is not marked pre-release, so
+`releases/latest` serves it. As before, it was created as a draft with
+`gh` and published from the GitHub page.
 
-On 2026-11-04 the branch's history from 2026-10-29 onwards was rewritten
-to take an image out of the top-level README, and the tag was moved to
-`5548cfd4c3`. That commit differs from `324af5281c` only by the image and
-its README line, so the binaries, which were not rebuilt, still match it
-and still report `324af528`.
-
-`324af5281c` differs from `1f8685e9`, the build flown on 2026-10-29, 30
+`5548cfd4c3` differs from `1f8685e9`, the build flown on 2026-10-29, 30
 and 31 (eleven flights in Stabilize, Alt Hold, Loiter and Acro), only in
-README.md and this file, so the release is the flown code. RTL, Auto, the
-GPS failsafe and #32995's commit 48 remain unflown.
+files the firmware is not built from, so the release is the flown code.
+RTL, Auto, the GPS failsafe and #32995's commit 48 remain unflown.
 
 Since `rp2350-20261027` the firmware has changed only by #32995 moving
 from `1b8b7e68cf` to `e45dae01b1` (2026-10-28 below): the rebuilt
