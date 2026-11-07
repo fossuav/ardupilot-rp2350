@@ -13,8 +13,10 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   GitHub holds it yet. It does not descend from `7e50cd016f`, so when
   alpha2 is released, tag `7e50cd016f` there as `rp2350-alpha1` before
   moving `rp2350-releases` to the new pin.
-- Fly the 200 MHz clock, the 100 MHz continuous-read flash and #32995's
-  new SRAM placement: they have run only on the bench.
+- The 200 MHz build has flown once (2026-11-07 below). Watch `DSF.Dp` in
+  the next logs: log 8 dropped 0.3 s of logging on the ground after
+  disarm, which no log on `1f8685e9` did. The OSD on its fractional PIO
+  divider has not been checked on video.
 - Drop the two local load measurement commits, `35ba09333e` and
   `69faaeb7ba`, when ArduPilot/ardupilot#33366 merges; they are not for
   #32995. They fix an upstream bug: master's `sysStopLoadMeasure()` only
@@ -53,7 +55,13 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   now over-compensates. Find what changed on the airframe; once it is
   fixed, fly a calibration flight with `COMPASS_MOTCT` 0 and refit.
   Charger figures for the packs are still owed to anchor the current
-  scale.
+  scale. On 2026-11-07 the coupling was back within 10% of the refit's,
+  so which pack flies, or how it is strapped, is the likelier variable.
+- With `COMPASS_MOTCT` 2 on an R3 board, the current input's drifting
+  zero is applied to the compass on the ground: on 2026-11-07 it turned
+  the heading -8.5 degrees cold and +20 warm, and failed the mag-field
+  arming check. Throttle-based compensation (`COMPASS_MOTCT` 1) fitted the
+  in-flight interference as well and is zero on the ground; not flown.
 - The OSD thread has 104 of 1504 bytes of stack free in every log
   (`STAK`), with MSP DisplayPort in use. Not investigated.
 - Upstream, not the port: Copter's pre-failsafe yaw reset is served from
@@ -63,6 +71,39 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   reporting 0.4-1.4 degrees of spread. Not raised upstream.
 - Log 7 of 2026-10-31 had a radio failsafe on the ground, 37 s after
   disarming. Not investigated.
+
+## 2026-11-07 - first flights of the alpha2 branch
+
+Two flights in one log from Andy's quad on `4d4220d940`, this branch, with
+the parameters of the last flight on `1f8685e9` but for the gyro
+calibration. #32995's head has since moved to `1fcec947c5`, whose tree is
+identical to `f0f78b48ec`, so the flown code is the PR's. These are the
+first flights of the 200 MHz clocks, the continuous-read flash, the new
+SRAM placement and the fractional PIO dividers.
+
+The port was clean in flight: rate loop 1600 Hz with a worst gap of 0.91
+ms, 2.23 ms at the arming instant against 4.3-6.5 ms on `1f8685e9`, no long
+loops at any time, nothing dropped on any UART, and DShot telemetry from
+all four ESCs with no errors. Scheduler load fell from 54-69% in flight to
+29-41%, and from 57% to 32% disarmed, about twice the fall the bench
+measured. Free heap is about 6 KB less. 281 log messages, 0.3 s of every
+stream, were dropped on the ground 1.4 s after the last disarm while both
+loops ran normally; the card's write latency and the new 25 MHz microSD
+clock are the candidates. Nothing on `1f8685e9` dropped.
+
+RTL flew for the first time, by switch: home from 34 m at 20 m, a 3.4 m
+overshoot, held within 1 m, and its descent begun before the pilot took
+over at about 11 m. Its landing, Auto, the GPS failsafe and #32995's
+commit 48 remain unflown.
+
+The GPS took 13 minutes to reach an EKF origin, as on the first power-up
+of 2026-10-29 and 2026-10-31. Meanwhile the board warmed to 25 degC and
+the current input read up to 7 A with the motors stopped, which
+`COMPASS_MOT` turned into up to 176 mG on the compass: the mag-field
+arming check failed on it, and would have read half as much without.
+The compass's coupling to battery current was back near 2026-10-30's.
+
+Measurements in `../ardupilot-pr-analysis/32995/bench-2026-11-07.md`.
 
 ## 2026-11-07 - alpha2 branch on #32995 at f0f78b48ec, 200 MHz
 
