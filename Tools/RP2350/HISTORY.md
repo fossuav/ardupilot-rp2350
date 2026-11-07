@@ -13,10 +13,19 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   GitHub holds it yet. It does not descend from `7e50cd016f`, so when
   alpha2 is released, tag `7e50cd016f` there as `rp2350-alpha1` before
   moving `rp2350-releases` to the new pin.
-- The 200 MHz build has flown once (2026-11-07 below). Watch `DSF.Dp` in
-  the next logs: log 8 dropped 0.3 s of logging on the ground after
-  disarm, which no log on `1f8685e9` did. The OSD on its fractional PIO
-  divider has not been checked on video.
+- The 200 MHz build has flown three times, on 2026-11-07 (below). Watch
+  `DSF.Dp` in the next logs: log 8 dropped 0.3 s of logging on the ground
+  after disarm, which no log on `1f8685e9` did; log 9 did not.
+- The GPS failsafe and #32995's commit 48 remain unflown; the quad has no
+  half-duplex port, so commit 48 needs another device or airframe.
+- The quad's settings for Auto: `WP_ACC_Z` 10 with `WP_SPD_DN` 10 make
+  RTL's landing come in fast, and GPS height (`EK3_SRC1_POSZ` 3) wandered
+  3 m on the ground against the baro's 0.3 m. Fly RTL's landing again with
+  `LAND_SPD_HIGH_MS` set or the vertical defaults, and on baro height
+  unless there is a reason for GPS. The PIO OSD on its fractional
+  divider has not run in flight: the quad uses MSP DisplayPort
+  (`OSD_TYPE` 5), and the PIO OSD (`OSD_TYPE` 6) needs a board with
+  analog video.
 - Drop the two local load measurement commits, `35ba09333e` and
   `69faaeb7ba`, when ArduPilot/ardupilot#33366 merges; they are not for
   #32995. They fix an upstream bug: master's `sysStopLoadMeasure()` only
@@ -56,7 +65,9 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   fixed, fly a calibration flight with `COMPASS_MOTCT` 0 and refit.
   Charger figures for the packs are still owed to anchor the current
   scale. On 2026-11-07 the coupling was back within 10% of the refit's,
-  so which pack flies, or how it is strapped, is the likelier variable.
+  so which pack flies, or how it is strapped, is the likelier variable;
+  the compass's static offset also moved about 100 mG between logs 8 and
+  9, when the pack was changed.
 - With `COMPASS_MOTCT` 2 on an R3 board, the current input's drifting
   zero is applied to the compass on the ground: on 2026-11-07 it turned
   the heading -8.5 degrees cold and +20 warm, and failed the mag-field
@@ -72,6 +83,28 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
 - Log 7 of 2026-10-31 had a radio failsafe on the ground, 37 s after
   disarming. Not investigated.
 
+## 2026-11-07 - an Auto mission on the alpha2 branch
+
+Log 9, an hour after log 8, on a fresh pack and with `EK3_SRC1_POSZ`
+changed from baro to GPS: takeoff to 25 m, ten spline waypoints and RTL,
+the first Auto flight on the port. The port was as clean as in log 8,
+with a worst rate-loop gap of 0.93 ms in flight and nothing dropped, and
+the 13 mission items stored and read back. Every waypoint was reached,
+within 0.8-4.8 m.
+
+The quad's waypoint settings (`WP_SPD` 40, `WP_ACC` 60, `WP_ACC_CNR` 80,
+`WP_JERK` 120) ask for more than its 30 degree lean limit gives, so it
+flew at the limit for 94% of the mission and fell up to 17 m behind its
+target on tight turns. RTL came home and began to land, but never slowed
+to `LAND_SPD_MS`: `WP_ACC_Z` 10 with `WP_SPD_DN` 10 starts the slowdown too
+late (in SITL it touches down at 0.8 m/s with both, 0.5 with either alone
+or with `LAND_SPD_HIGH_MS` 2), and GPS height had wandered 3 m on the
+ground, so home was set low. The pilot took over at about 0.7 m. Both are
+configuration, not the port.
+
+Measurements in `../ardupilot-pr-analysis/32995/bench-2026-11-07.md`,
+"Log 9".
+
 ## 2026-11-07 - first flights of the alpha2 branch
 
 Two flights in one log from Andy's quad on `4d4220d940`, this branch, with
@@ -79,7 +112,8 @@ the parameters of the last flight on `1f8685e9` but for the gyro
 calibration. #32995's head has since moved to `1fcec947c5`, whose tree is
 identical to `f0f78b48ec`, so the flown code is the PR's. These are the
 first flights of the 200 MHz clocks, the continuous-read flash, the new
-SRAM placement and the fractional PIO dividers.
+SRAM placement and bidirectional DShot's fractional PIO divider. The PIO
+OSD did not run, as the quad uses MSP DisplayPort.
 
 The port was clean in flight: rate loop 1600 Hz with a worst gap of 0.91
 ms, 2.23 ms at the arming instant against 4.3-6.5 ms on `1f8685e9`, no long
