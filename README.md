@@ -37,7 +37,7 @@ This is development firmware, and only Copter has flown. RPI_UAVFC has flown on 
 | [Pico2](libraries/AP_HAL_ChibiOS/hwdef/Pico2/README.md) | RP2350A | A stock Raspberry Pi Pico 2 or Pico 2 W running Simulation on Hardware: the flight code runs on the real chip against a physics model, so nothing need be attached but USB | Copter |
 | [Laurel](libraries/AP_HAL_ChibiOS/hwdef/Laurel/README.md) | RP2350B | The first RP2350B development board; nothing has flown on it with the current code | Build from source |
 
-Each board's README covers its pinout, serial ports and settings. All three run both RP2350 cores at 225 MHz: the main loop runs on core 0, and the fast rate thread on core 1 (on by default on RPI_UAVFC and Laurel, off on Pico2).
+Each board's README covers its pinout, serial ports and settings. All three run both RP2350 cores at 200 MHz, with the flash at 100 MHz: the main loop runs on core 0, and the fast rate thread on core 1 (on by default on RPI_UAVFC and Laurel, off on Pico2).
 
 Plane, Rover and the other vehicles build for these boards but have not been run on them.
 
@@ -182,7 +182,7 @@ The branch is ArduPilot master as of 2026-10-24 with the RP2350 port and the fix
 
 These are the ones that matter when flying. The full list of open work is in the [developer notes](libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md#known-issues-and-open-work).
 
-- The RP2350 runs at 225 MHz, 1.5 times its 150 MHz datasheet rating. This has been validated only on the bring-up boards.
+- The RP2350 runs at 200 MHz, 1.33 times its 150 MHz datasheet rating, with its flash at 100 MHz in continuous read. Both have been tested only on the bench, on the bring-up boards; earlier flights ran at 225 MHz with the flash at 75 MHz.
 - If the board has been powered for more than about an hour, reboot it before you fly. The 71.6 minute wrap of the microsecond clock has not yet been soak-tested through arming and disarming.
 - After flashing over SWD, power-cycle the board: the second core sometimes fails to start after a debugger has been attached.
 - DShot600 is the only DShot rate. BLHeli passthrough, CAN and serial ESC telemetry are not available on these boards; use bidirectional DShot for RPM.
