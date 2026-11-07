@@ -8,8 +8,15 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
 
 ## Open work
 
-- Drop the two local load measurement commits, `1eebac56d2` and
-  `c03191be64`, when ArduPilot/ardupilot#33366 merges; they are not for
+- Push the ChibiOS pin `f92aa3d2bd` to fossuav/ChibiOS before this branch
+  is pushed: CI and every clone fetch it by SHA, and no branch or tag on
+  GitHub holds it yet. It does not descend from `7e50cd016f`, so when
+  alpha2 is released, tag `7e50cd016f` there as `rp2350-alpha1` before
+  moving `rp2350-releases` to the new pin.
+- Fly the 200 MHz clock, the 100 MHz continuous-read flash and #32995's
+  new SRAM placement: they have run only on the bench.
+- Drop the two local load measurement commits, `35ba09333e` and
+  `69faaeb7ba`, when ArduPilot/ardupilot#33366 merges; they are not for
   #32995. They fix an upstream bug: master's `sysStopLoadMeasure()` only
   requests a stop, taken at the next idle entry, so the
   `sysStartLoadMeasure()` straight after it in `Util::thread_info()` does
@@ -56,6 +63,41 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   reporting 0.4-1.4 degrees of spread. Not raised upstream.
 - Log 7 of 2026-10-31 had a radio failsafe on the ground, 37 s after
   disarming. Not investigated.
+
+## 2026-11-07 - alpha2 branch on #32995 at f0f78b48ec, 200 MHz
+
+`ArduPilot-4.8-rp2350-alpha2`, for the next release, was rebuilt on
+#32995's head `f0f78b48ec`: 71 commits on master `2f3644c90e`, of which
+the first 55 are the `e45dae01b1` the branch already carried. Master,
+the follow-up PRs, the local commits and this repository's commits are
+unchanged: 29 of the 30 replayed commits have the same patch, and
+#34477's ChibiOS update differs only in its pin. Apart from the pin, the
+tree changed exactly as #32995 did. The branch as it was is kept locally
+as `pre-rebase/ArduPilot-4.8-rp2350-alpha2-20261107`.
+
+The 16 new commits run all three boards at 200 MHz from a 1200 MHz VCO,
+with the flash at 100 MHz in continuous read and 3 clocks between reads,
+in place of 225 MHz with a 75 MHz flash clock. Bidirectional DShot and the
+OSD take fractional PIO dividers to suit. More of both cores' hot paths
+move to SRAM, external AHRS is compiled out (40 KB of flash, 544 bytes
+more heap), `Scheduler::delay()` drops a 64-bit divide, and SPI runs at
+the fastest clock not above the request, which puts the microSD at 25
+MHz. On the RPI_UAVFC bench, armed with DShot, logging and the OSD,
+#32995 measures the scheduler load at 36% at 225 MHz, 31% at 200 MHz,
+and 25% with the core0 placement and external AHRS out. RPI_UAVFC's
+flash read window was swept; Laurel and a Pico 2 read their whole flash
+back correctly at 200 MHz. All of it is bench only: nothing
+has flown. The bootloaders are not rebuilt, as #32995 changes no
+`hwdef-bl.dat`.
+
+They need #113's new head, `39ed91cb62`, which adds the continuous read
+and deselect time, off unless a board defines them. #115 was reapplied
+on it unchanged (same patch-id) as `f92aa3d2bd`, now the pin, held
+locally on branch `rp2350-alpha2` in `modules/ChibiOS`.
+
+RPI_UAVFC, Pico2 and Laurel build Copter and the bootloader with no
+warnings, as CI does; RPI_UAVFC's Copter uses 1423236 bytes of flash.
+Not yet run on a board.
 
 ## 2026-11-02 - rp2350-alpha1
 
