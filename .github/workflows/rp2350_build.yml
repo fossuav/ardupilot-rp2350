@@ -38,7 +38,7 @@ jobs:
           submodules: 'recursive'
 
       - name: restore ccache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: ~/.ccache
           key: rp2350-ccache-${{ matrix.board }}-${{ github.run_id }}
@@ -60,7 +60,7 @@ jobs:
       # upstream writes only from master
       - name: save ccache
         if: github.event_name == 'push' && github.ref == 'refs/heads/ArduPilot-4.8-rp2350'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: ~/.ccache
           key: rp2350-ccache-${{ matrix.board }}-${{ github.run_id }}
