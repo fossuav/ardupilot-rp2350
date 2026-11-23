@@ -917,6 +917,50 @@ bool Util::get_true_random_vals(uint8_t* data, size_t size, uint32_t timeout_us)
 #endif
 }
 
+#if HAL_LOGGING_ENABLED && defined(RP2350) && CH_CFG_SMP_MODE == TRUE && AP_CPU_IDLE_STATS_ENABLED && HAL_USE_LOAD_MEASURE
+#define AP_RP2350_LOAD_LOG_ENABLED 1
+extern "C" void rp2350_xip_cache_stats(uint32_t *hit, uint32_t *acc);
+
+// @LoggerMessage: RPLD
+// @Description: RP2350 per-core load and XIP cache rates
+// @Field: TimeUS: Time since system startup
+// @Field: C0: core0 idle-hook load average
+// @Field: C1: core1 idle-hook load average
+// @Field: XHit: XIP cache hit rate since the previous message
+// @Field: XAcc: XIP cache accesses since the previous message, millions per second
+
+/*
+  log each core's load and the XIP cache rates at 1Hz. The load reads zero
+  until the first threads.txt read starts the measurement, which the logger
+  does at arming.
+*/
+static void log_rp2350_load(void)
+{
+    static uint32_t last_ms;
+    const uint32_t now_ms = AP_HAL::millis();
+    if (last_ms == 0) {
+        // discard what the counters gathered since boot
+        rp2350_xip_cache_stats(nullptr, nullptr);
+        last_ms = now_ms;
+        return;
+    }
+    const uint32_t dt_ms = now_ms - last_ms;
+    if (dt_ms < 1000) {
+        return;
+    }
+    last_ms = now_ms;
+
+    uint32_t hit, acc;
+    rp2350_xip_cache_stats(&hit, &acc);
+    AP::logger().WriteStreaming("RPLD", "TimeUS,C0,C1,XHit,XAcc", "s%%%-", "F000-", "Qffff",
+                                AP_HAL::micros64(),
+                                sysGetCoreCPUAverageLoad(0) * 0.01f,
+                                sysGetCoreCPUAverageLoad(1) * 0.01f,
+                                acc > 0 ? hit * 100.0f / acc : 0.0f,
+                                acc * 1.0e-3f / dt_ms);
+}
+#endif  // HAL_LOGGING_ENABLED && RP2350 && SMP && idle stats
+
 /*
   log info on stack usage. Called at 1Hz by logging thread, logs next
   thread on each call
@@ -924,6 +968,9 @@ bool Util::get_true_random_vals(uint8_t* data, size_t size, uint32_t timeout_us)
 void Util::log_stack_info(void)
 {
 #if HAL_LOGGING_ENABLED
+#if defined(AP_RP2350_LOAD_LOG_ENABLED)
+    log_rp2350_load();
+#endif
     static thread_t *last_tp;
     static uint8_t thread_id;
     thread_t *tp = last_tp;
