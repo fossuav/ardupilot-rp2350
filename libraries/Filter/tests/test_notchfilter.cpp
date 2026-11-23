@@ -404,4 +404,42 @@ TEST(NotchFilterTest, HarmonicNotchMaxFilters)
     filter.apply(1.0);
 }
 
+/*
+  a notch's first three outputs for a unit impulse are set by its five
+  coefficients, so compare them with the exact design from close to zero
+  frequency up to close to Nyquist
+ */
+TEST(NotchFilterTest, CoefficientsTest)
+{
+    // float coefficients and their rounding in apply() stay within this
+    const double tolerance = 3e-6;
+    const double pi = acos(double(-1));
+    const float A = 0.1;
+    const float Q = 4;
+
+    for (const float rate_hz : {1000.0f, 1600.0f, 3200.0f, 8000.0f}) {
+        for (float center_hz = 5; center_hz < 0.49f * rate_hz; center_hz *= 1.01f) {
+            NotchFilter<float> filter {};
+            filter.init_with_A_and_Q(rate_hz, center_hz, A, Q);
+
+            const double omega = 2 * pi * double(center_hz) / double(rate_hz);
+            const double alpha = sin(omega) / (2 * double(Q));
+            const double a0 = 1 + alpha;
+            const double A2 = double(A) * double(A);
+            const double b0 = (1 + alpha * A2) / a0;
+            const double b1 = -2 * cos(omega) / a0;
+            const double b2 = (1 - alpha * A2) / a0;
+            const double a1 = b1;
+            const double a2 = (1 - alpha) / a0;
+
+            const double y0 = b0;
+            const double y1 = b1 - a1 * y0;
+            const double y2 = b2 - a1 * y1 - a2 * y0;
+            EXPECT_NEAR(filter.apply(1.0f), y0, tolerance) << center_hz << " Hz at " << rate_hz;
+            EXPECT_NEAR(filter.apply(0.0f), y1, tolerance) << center_hz << " Hz at " << rate_hz;
+            EXPECT_NEAR(filter.apply(0.0f), y2, tolerance) << center_hz << " Hz at " << rate_hz;
+        }
+    }
+}
+
 AP_GTEST_MAIN()
