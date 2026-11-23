@@ -26,6 +26,58 @@ const static float NOTCH_MAX_SLEW_LOWER = 1.0f - NOTCH_MAX_SLEW;
 const static float NOTCH_MAX_SLEW_UPPER = 1.0f / NOTCH_MAX_SLEW_LOWER;
 
 /*
+   calculate the sine and cosine of an angle from 0 to pi, the range of a
+   notch's omega, to within 1e-7. A dynamic notch recalculates its
+   coefficients for every notch at up to half the gyro rate, where calling
+   sinf() and cosf() separately, each with its general range reduction, is
+   a large part of the cost. Forced inline so that it runs from wherever
+   the caller is placed in memory.
+ */
+__attribute__((always_inline)) static inline void sin_cos_0_to_pi(float angle_rad, float &sin_angle, float &cos_angle)
+{
+    static constexpr float PI_4 = 0.785398163f;
+    static constexpr float THREE_PI_4 = 2.35619449f;
+    // pi/2 and pi as a float and its remainder, so the reduction keeps full precision
+    static constexpr float PI_2_HI = 1.57079637f;
+    static constexpr float PI_2_LO = -4.37113900e-08f;
+    static constexpr float PI_HI = 3.14159274f;
+    static constexpr float PI_LO = -8.74227801e-08f;
+    // minimax polynomials for sin(x) and cos(x) over +-pi/4
+    static constexpr float S3 = -1.666665077e-01f;
+    static constexpr float S5 = 8.331978694e-03f;
+    static constexpr float S7 = -1.949563593e-04f;
+    static constexpr float C2 = -5.000000000e-01f;
+    static constexpr float C4 = 4.166662320e-02f;
+    static constexpr float C6 = -1.388676348e-03f;
+    static constexpr float C8 = 2.439045056e-05f;
+
+    const bool upper_quarter = angle_rad >= THREE_PI_4;
+    const bool middle_half = !upper_quarter && angle_rad > PI_4;
+
+    float x = angle_rad;
+    if (middle_half) {
+        x = (angle_rad - PI_2_HI) - PI_2_LO;
+    } else if (upper_quarter) {
+        x = (PI_HI - angle_rad) + PI_LO;
+    }
+
+    const float x2 = x * x;
+    const float sin_x = x + x * x2 * (S3 + x2 * (S5 + x2 * S7));
+    const float cos_x = 1.0f + x2 * (C2 + x2 * (C4 + x2 * (C6 + x2 * C8)));
+
+    if (middle_half) {
+        sin_angle = cos_x;
+        cos_angle = -sin_x;
+    } else if (upper_quarter) {
+        sin_angle = sin_x;
+        cos_angle = -cos_x;
+    } else {
+        sin_angle = sin_x;
+        cos_angle = cos_x;
+    }
+}
+
+/*
    calculate the attenuation and quality factors of the filter
  */
 template <class T>
@@ -75,9 +127,11 @@ void NotchFilter<T>::init_with_A_and_Q(float sample_freq_hz, float center_freq_h
 
     if (is_positive(new_center_freq) && (new_center_freq < 0.5 * sample_freq_hz) && (Q > 0.0)) {
         float omega = 2.0 * M_PI * new_center_freq / sample_freq_hz;
-        float alpha = sinf(omega) / (2 * Q);
+        float sin_omega, cos_omega;
+        sin_cos_0_to_pi(omega, sin_omega, cos_omega);
+        float alpha = sin_omega / (2 * Q);
         b0 =  1.0 + alpha*sq(A);
-        b1 = -2.0 * cosf(omega);
+        b1 = -2.0 * cos_omega;
         b2 =  1.0 - alpha*sq(A);
         a1 = b1;
         a2 =  1.0 - alpha;
