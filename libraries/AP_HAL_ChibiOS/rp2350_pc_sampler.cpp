@@ -88,7 +88,14 @@ struct prof_core {
     uint16_t cnt[PROF_HASH_SIZE];  /* saturating sample count               */
     uint32_t total;                /* samples taken                         */
     uint32_t dropped;              /* not-code PC or probe chain full       */
+    uint32_t idle;                 /* samples in this core's idle loop      */
 };
+
+/* The idle loops, from rp2350_idle_loops.S, with their sizes in bytes. */
+extern "C" void rp2350_idle_c0(void);
+extern "C" void rp2350_idle_c1(void);
+#define PROF_IDLE_C0_BYTES 4u
+#define PROF_IDLE_C1_BYTES 6u
 
 static struct prof_core prof[2];
 static bool inited_core0;
@@ -125,11 +132,14 @@ void rp2350_pc_sampler_sink(uint32_t addr, uint32_t alarm)
         pc->dropped++;
         return;
     }
-    /* Key flash by its 8-byte XIP cache line so core0's diffuse code fits.
-     * SRAM keeps exact PCs, so the idle loops stay attributed to themselves. */
-    if (addr < 0x20000000u) {
-        addr &= ~7u;
+    /* Idle is over half the samples and would saturate a 16-bit count. */
+    if (addr - ((uint32_t)(uintptr_t)rp2350_idle_c0 & ~1u) < PROF_IDLE_C0_BYTES ||
+        addr - ((uint32_t)(uintptr_t)rp2350_idle_c1 & ~1u) < PROF_IDLE_C1_BYTES) {
+        pc->idle++;
+        return;
     }
+    /* Key by 8-byte line, the XIP cache's, so core0's diffuse code fits. */
+    addr &= ~7u;
 
     uint32_t idx = (addr * 2654435761u) >> (32u - PROF_HASH_BITS);
     for (unsigned probe = 0; probe < PROF_PROBE_MAX; probe++) {
@@ -368,6 +378,12 @@ void rp2350_pc_sampler_dump_full(ExpandingString &str, unsigned core)
     if (core > 1) {
         return;
     }
+    /* The selection below holds the FTP thread, above the main loop's priority,
+     * for over 100 ms, so it must not run in flight. */
+    if (prof_recording) {
+        str.printf("PROF c%u not dumped while armed\n", core);
+        return;
+    }
     const struct prof_core *pc = &prof[core];
 
     unsigned ntop = 0;
@@ -389,8 +405,9 @@ void rp2350_pc_sampler_dump_full(ExpandingString &str, unsigned core)
         }
     }
 
-    str.printf("PROF c%u n=%lu drop=%lu top=%u\n", core,
-               (unsigned long)pc->total, (unsigned long)pc->dropped, ntop);
+    str.printf("PROF c%u n=%lu drop=%lu idle=%lu top=%u\n", core,
+               (unsigned long)pc->total, (unsigned long)pc->dropped,
+               (unsigned long)pc->idle, ntop);
 
     /* Region-tagged offset:count tokens, ~12 per line; the offline tool
      * aggregates by function. */
