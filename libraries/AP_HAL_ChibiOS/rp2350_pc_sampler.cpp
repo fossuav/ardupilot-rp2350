@@ -138,8 +138,9 @@ void rp2350_pc_sampler_sink(uint32_t addr, uint32_t alarm)
         pc->idle++;
         return;
     }
-    /* Key by 8-byte line, the XIP cache's, so core0's diffuse code fits. */
-    addr &= ~7u;
+    /* Key by 8-byte line, the XIP cache's, or 16 on core0: its code is too
+     * diffuse for the table at 8 (a fifth of its busy samples dropped). */
+    addr &= (core == 0u) ? ~15u : ~7u;
 
     uint32_t idx = (addr * 2654435761u) >> (32u - PROF_HASH_BITS);
     for (unsigned probe = 0; probe < PROF_PROBE_MAX; probe++) {
@@ -365,9 +366,9 @@ uint32_t rp2350_pc_sampler_dump(unsigned core, unsigned maxn,
 }
 
 /*
- * Dump only the hottest PROF_FULL_TOPN keys rather than the whole table: 2048
- * is as many 8-byte lines as the 16 KB XIP cache holds, in about 25 KB of text.
- * Selection buffers are static (BSS), not on the FTP thread's stack.
+ * Dump only the hottest PROF_FULL_TOPN keys rather than the whole table, in
+ * about 21 KB of text. Selection buffers are static (BSS), not on the FTP
+ * thread's stack.
  */
 #define PROF_FULL_TOPN 2048u
 static uint32_t full_pc[PROF_FULL_TOPN];
