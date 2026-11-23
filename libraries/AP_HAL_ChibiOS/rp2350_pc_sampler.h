@@ -42,6 +42,7 @@
 
 #if defined(RP2350) && AP_RP2350_PC_SAMPLER_ENABLED
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -54,6 +55,9 @@ void rp2350_pc_sampler_init_core0(void);
 /* Arm ALARM3 and enable its IRQ on the calling core (core1). Idempotent.
  * Must be called from a thread that runs on core1 (e.g. the rate thread). */
 void rp2350_pc_sampler_init_core1(void);
+
+/* Count samples only while recording, so a flight profile holds armed code. */
+void rp2350_pc_sampler_set_recording(bool recording);
 
 /*
  * Format the top-N buckets for one core (0 or 1) into buf as newline-separated

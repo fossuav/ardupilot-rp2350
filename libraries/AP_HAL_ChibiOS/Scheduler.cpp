@@ -896,6 +896,12 @@ void Scheduler::_io_thread(void* arg)
         }
 #endif  // defined(RP2350) && AP_RP2350_DEBUG_REPORT_ENABLED && !defined(HAL_BOOTLOADER_BUILD)
 
+#if defined(RP2350) && AP_RP2350_PC_SAMPLER_ENABLED && !defined(HAL_BOOTLOADER_BUILD)
+        // this thread is on core0, whose alarm must be armed from there
+        rp2350_pc_sampler_init_core0();
+        rp2350_pc_sampler_set_recording(hal.util->get_soft_armed());
+#endif  // defined(RP2350) && AP_RP2350_PC_SAMPLER_ENABLED && !defined(HAL_BOOTLOADER_BUILD)
+
 #if HAL_LOGGING_ENABLED || CH_DBG_ENABLE_STACK_CHECK == TRUE || AP_CRASHDUMP_FATFS_ENABLED
         uint32_t now = AP_HAL::millis();
 #endif
