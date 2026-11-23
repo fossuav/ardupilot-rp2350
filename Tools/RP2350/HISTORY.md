@@ -8,14 +8,18 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
 
 ## Open work
 
-- Push the ChibiOS pin `f92aa3d2bd` to fossuav/ChibiOS before this branch
-  is pushed: CI and every clone fetch it by SHA, and no branch or tag on
-  GitHub holds it yet. It does not descend from `7e50cd016f`, so when
-  alpha2 is released, tag `7e50cd016f` there as `rp2350-alpha1` before
-  moving `rp2350-releases` to the new pin.
+- Fly branch `notch-fast-sincos` to `flight-test/NOTCH_CARD.md`. It needs
+  the quad's motors: the saving cannot show on a static bench. Until it has
+  flown, its two `Filter:` commits stay off the release branch and out of
+  any upstream PR.
+- The ChibiOS pin `f92aa3d2bd` is on fossuav/ChibiOS as branch
+  `rp2350-alpha2`. It does not descend from `7e50cd016f`, so when alpha2 is
+  released, tag `7e50cd016f` there as `rp2350-alpha1` before moving
+  `rp2350-releases` to the new pin.
 - The 200 MHz build has flown three times, on 2026-11-07 (below). Watch
   `DSF.Dp` in the next logs: log 8 dropped 0.3 s of logging on the ground
-  after disarm, which no log on `1f8685e9` did; log 9 did not.
+  after disarm, which no log on `1f8685e9` did; log 9 did not. Logs 12-15
+  of 2026-11-23 dropped nothing.
 - The GPS failsafe and #32995's commit 48 remain unflown; the quad has no
   half-duplex port, so commit 48 needs another device or airframe.
 - The quad's settings for Auto: `WP_ACC_Z` 10 with `WP_SPD_DN` 10 make
@@ -59,6 +63,10 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   update the port's current-input text (`rp2350/DEVELOPMENT.md`, the
   RPI_UAVFC README and `defaults.parm`'s comment), which describes only
   the 82.5k R3 boards and now disagrees with the top-level README.
+- The next two compass items describe the old module, a QMC5883L. Between
+  logs 9 and 12 the quad got a new GPS/compass module with an IST8310,
+  refitted for log 15 (`COMPASS_MOT` about 4.4 mG/A), so they may no longer
+  apply.
 - The quad's compass: its coupling to battery current fell by about a
   third between 2026-10-30 and 2026-10-31, so the refitted `COMPASS_MOT`
   now over-compensates. Find what changed on the airframe; once it is
@@ -74,7 +82,8 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   arming check. Throttle-based compensation (`COMPASS_MOTCT` 1) fitted the
   in-flight interference as well and is zero on the ground; not flown.
 - The OSD thread has 104 of 1504 bytes of stack free in every log
-  (`STAK`), with MSP DisplayPort in use. Not investigated.
+  (`STAK`), with MSP DisplayPort in use. Not investigated. On 2026-11-23
+  it read 88-96 bytes.
 - Upstream, not the port: Copter's pre-failsafe yaw reset is served from
   the GSF and fails the compass for the rest of the flight. On 2026-10-30
   it fired mid-flip as the GSF lost track and left the yaw 110 degrees
@@ -82,6 +91,37 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   reporting 0.4-1.4 degrees of spread. Not raised upstream.
 - Log 7 of 2026-10-31 had a radio failsafe on the ground, 37 s after
   disarming. Not investigated.
+
+## 2026-11-23 - the notch update without libm, branch notch-fast-sincos
+
+In flight the notch coefficient update is 24-25% of core1's busy time, and
+its `sinf()`, `cosf()` and range reduction are 11-12%, part of it in flash.
+`c1c925b716` tests the coefficients against an exact design, and
+`727edd1929` calculates the sine and cosine together from an inlined
+polynomial. Both results are within 9e-8 of exact for every float angle
+from 1e-4 to pi, and the notch response differs from libm's by less than
+0.004 dB. It costs 424 bytes of flash and 208 of SRAM on RPI_UAVFC.
+
+It has run in host tests and SITL only, so the saving is not measured. The
+most it can save is about 7-8 points of core1. `flight-test/NOTCH_CARD.md`
+is the flight that measures it. Details are in
+`../ardupilot-pr-analysis/32995/README.md`.
+
+## 2026-11-23 - the alpha2 flight card on 031f2549
+
+Four logs from the quad on `031f2549`, which is #32995 at `5e97be2505` with
+the follow-ups and six flight-test commits. Logs 12-14 flew the card at low
+throttle and log 15 flew the hard leg in Acro, at 0.54 throttle, 37 A and
+30 m/s. The port was clean on all four, with a worst rate-loop gap in
+flight of 0.96 ms and no long loops, log drops or ESC telemetry errors.
+
+Core1 runs at 64-68% armed against 45% disarmed, rising with motor speed.
+LED_roll costs core0 5.8 points and core1 0.4. Core1's code is 8% in flash,
+mostly `__ieee754_rem_pio2f`. Core0's profile filled its table, so its
+placement is not settled. Logs 12-14 had no reply on the DisplayPort, and
+log 15 was the first card flight with one.
+
+Measurements in `../ardupilot-pr-analysis/32995/bench-2026-11-23.md`.
 
 ## 2026-11-07 - an Auto mission on the alpha2 branch
 
