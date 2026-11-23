@@ -52,11 +52,10 @@
  */
 #define PROF_INTERVAL_US   197u
 
-/* Per-core PC hash table. 2048 slots/core keeps the BSS to 24 KB total, which
- * matters because runtime free heap is tight (~20 KB after EKF init). Colder
- * PCs beyond the table capacity drop (counted), but the hot set we rank stays
+/* Per-core PC hash table. 4096 slots/core is 48 KB of BSS in total. Colder PCs
+ * beyond the table capacity drop (counted), but the hot set we rank stays
  * resident. */
-#define PROF_HASH_BITS     11u
+#define PROF_HASH_BITS     12u
 #define PROF_HASH_SIZE     (1u << PROF_HASH_BITS)
 #define PROF_HASH_MASK     (PROF_HASH_SIZE - 1u)
 #define PROF_PROBE_MAX     8u
@@ -94,6 +93,7 @@ struct prof_core {
 static struct prof_core prof[2];
 static bool inited_core0;
 static bool inited_core1;
+static volatile bool prof_recording;
 
 /*
  * Record one sample and re-arm the alarm. Called (tail-branched) from the naked
@@ -112,6 +112,10 @@ void rp2350_pc_sampler_sink(uint32_t addr, uint32_t alarm)
     TIMER0->INTR = (1u << alarm);
     TIMER0->ALARM[alarm] = TIMER0->TIMERAWL + PROF_INTERVAL_US;
 
+    if (!prof_recording) {
+        return;
+    }
+
     const unsigned core = (unsigned)port_get_core_id() & 1u;
     struct prof_core *pc = &prof[core];
     pc->total++;
@@ -120,6 +124,11 @@ void rp2350_pc_sampler_sink(uint32_t addr, uint32_t alarm)
     if (addr < 0x10000000u) {          /* ROM/poison: not attributable code */
         pc->dropped++;
         return;
+    }
+    /* Key flash by its 8-byte XIP cache line so core0's diffuse code fits.
+     * SRAM keeps exact PCs, so the idle loops stay attributed to themselves. */
+    if (addr < 0x20000000u) {
+        addr &= ~7u;
     }
 
     uint32_t idx = (addr * 2654435761u) >> (32u - PROF_HASH_BITS);
@@ -201,6 +210,11 @@ void rp2350_pc_sampler_init_core1(void)
     inited_core1 = true;
     sampler_arm(3);
     nvicEnableVector(RP_TIMER0_IRQ3_NUMBER, 0);
+}
+
+void rp2350_pc_sampler_set_recording(bool recording)
+{
+    prof_recording = recording;
 }
 
 /* Region tag for an address, and its offset from the region base, for the
@@ -341,12 +355,11 @@ uint32_t rp2350_pc_sampler_dump(unsigned core, unsigned maxn,
 }
 
 /*
- * Runtime free heap is tight (~20 KB after EKF init), so dump only the hottest
- * PROF_FULL_TOPN PCs rather than the whole table - 32x the STATUSTEXT top-16,
- * enough to rank functions, but a few KB. Selection buffers are static (BSS),
- * not on the FTP thread's stack.
+ * Dump only the hottest PROF_FULL_TOPN keys rather than the whole table: 2048
+ * is as many 8-byte lines as the 16 KB XIP cache holds, in about 25 KB of text.
+ * Selection buffers are static (BSS), not on the FTP thread's stack.
  */
-#define PROF_FULL_TOPN 512u
+#define PROF_FULL_TOPN 2048u
 static uint32_t full_pc[PROF_FULL_TOPN];
 static uint16_t full_cnt[PROF_FULL_TOPN];
 
