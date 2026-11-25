@@ -48,6 +48,13 @@ ArduCopter/Copter.h|Copter::get_rate_thread_decimation  # 18 B (sram) [inlinable
 ArduCopter/Copter.h|Copter::rate_thread_motors_output  # 4 B (sram) [inlinable]
 ArduCopter/rate_thread.cpp|Copter::get_rate_thread_logging  # 28 B (sram)
 ArduCopter/rate_thread.cpp|Copter::rate_thread_log_update  # 60 B (sram)
+# QuadPlane's rate thread hooks, called from AP_Vehicle::rate_controller_thread on core1
+ArduPlane/rate_thread.cpp|Plane::get_rate_thread_type  # 48 B (sram) [arduplane]
+ArduPlane/rate_thread.cpp|Plane::get_rate_thread_decimation  # 18 B (sram) [arduplane]
+ArduPlane/rate_thread.cpp|Plane::rate_thread_motors_output  # 10 B (sram) [arduplane]
+ArduPlane/quadplane.cpp|QuadPlane::rate_thread_output  # 72 B (sram) [arduplane]
+ArduPlane/quadplane.cpp|QuadPlane::main_loop_owns_motors  # 16 B (sram) [arduplane]
+ArduPlane/quadplane.cpp|QuadPlane::esc_calibration_running  # 36 B (sram) [arduplane]
 # NOTE: input_euler_angle_roll_pitch_euler_rate_yaw_rad, attitude_controller_run_quat,
 # thrust_heading_rotation_angles, update_ang_vel_target_from_att_error moved to Scratch X
 # (rp2350_scratchx_registry.txt) -- core0-dedicated SRAM8 for zero-contention fetches.
