@@ -453,7 +453,9 @@ state for no gain at these loop rates. All three hwdefs set
 Laurel and RPI_UAVFC ship `INS_GYRO_RATE 2`, `FSTRATE_ENABLE 2` and
 `FSTRATE_DIV 2`, and lower Copter's default main loop rate to 200 Hz with
 `AP_SCHEDULER_COPTER_DEFAULT_LOOP_RATE_HZ`, which gives a 4 kHz gyro backend,
-a 2 kHz rate thread on core1 and a 200 Hz main loop on core0. Laurel measured
+a 2 kHz rate thread on core1 and a 200 Hz main loop on core0. QuadPlane gets
+the same split from `Q_FSTRATE_ENABLE 2`, `Q_FSTRATE_DIV 2` and
+`AP_PLANE_QUADPLANE_DEFAULT_LOOP_RATE_HZ`, 200 in place of its usual 300. Laurel measured
 about 65% busy on core0 and 37% on core1 in that configuration. Both boards
 measured about 190 us on average from gyro sample to motor output, of which
 the rate controller is 12-13 us. That instrumentation is not in the tree;
@@ -990,11 +992,12 @@ each scheduler task's MIN/MAX/AVG time, overruns and share of the loop.
 
 | Setting | Value | Set in | Effect |
 |---------|-------|--------|--------|
-| `SCHED_LOOP_RATE` | 200 for Copter | `AP_SCHEDULER_COPTER_DEFAULT_LOOP_RATE_HZ` in `hwdef.dat`, Laurel and RPI_UAVFC | core0 main loop; other vehicles keep their own default (Plane and Rover 50 Hz) |
+| `SCHED_LOOP_RATE` | 200 for Copter | `AP_SCHEDULER_COPTER_DEFAULT_LOOP_RATE_HZ` in `hwdef.dat`, Laurel and RPI_UAVFC | core0 main loop; other vehicles keep their own default (fixed-wing Plane and Rover 50 Hz) |
+| `SCHED_LOOP_RATE` | 200 for QuadPlane | `AP_PLANE_QUADPLANE_DEFAULT_LOOP_RATE_HZ` in `hwdef.dat`, Laurel and RPI_UAVFC | core0 main loop, in place of QuadPlane's 300 |
 | `SCHED_LOOP_RATE` | 200 | `defaults.parm`, Pico2 | matches `SIM_RATE_HZ`, any vehicle |
 | `INS_GYRO_RATE`, `INS_FAST_SAMPLE` | 2, 1 | Laurel, RPI_UAVFC | 4 kHz IMU backend |
-| `FSTRATE_ENABLE` | 2 | Laurel, RPI_UAVFC | divisor fixed once armed |
-| `FSTRATE_DIV` | 2 | Laurel, RPI_UAVFC | 2 kHz rate thread on core1 |
+| `FSTRATE_ENABLE`, `Q_FSTRATE_ENABLE` | 2 | Laurel, RPI_UAVFC | divisor fixed once armed |
+| `FSTRATE_DIV`, `Q_FSTRATE_DIV` | 2 | Laurel, RPI_UAVFC | 2 kHz rate thread on core1 |
 | `AP_GCS_UPDATE_RATE_HZ` | 25 | `PICO2.py`, every board | GCS receive and send tasks |
 
 Core0 runs everything but the rate path, mostly from XIP, so its loop rate is
@@ -1713,6 +1716,10 @@ nose up, right side down and clockwise yaw from above all read positive.
   once armed. Copter's 200 Hz main loop on core0 comes from
   `AP_SCHEDULER_COPTER_DEFAULT_LOOP_RATE_HZ` in `hwdef.dat`, not from
   `defaults.parm`, so that Plane keeps its own 50 Hz default.
+- `Q_FSTRATE_ENABLE` 2, `Q_FSTRATE_DIV` 2: the same for QuadPlane's VTOL
+  rate loop, with its 200 Hz main loop from
+  `AP_PLANE_QUADPLANE_DEFAULT_LOOP_RATE_HZ`. Copter ignores the `Q_`
+  parameters and Plane the others.
 - `SERVO_DSHOT_RATE` 1 multiplies the rate-loop rate, not
   `SCHED_LOOP_RATE`, making the DShot cycle timeout one rate-loop period.
 - `EK3_IMU_MASK` 1: one IMU, one EKF core, which keeps the DCM roll/pitch
