@@ -193,9 +193,14 @@ define HAL_BARO_ALLOW_INIT_NO_BARO 1
 # logging) needs only a modest rate. It was set at the 225 MHz core clock;
 # 200 MHz with the 100 MHz flash clock gives the main loop more headroom on
 # RPI_UAVFC, not less. Other vehicles keep their own default, as
-# SCHED_LOOP_RATE in defaults.parm would not: Plane has no rate thread and
-# defaults to 50 Hz.
+# SCHED_LOOP_RATE in defaults.parm would not: fixed-wing Plane defaults to
+# 50 Hz.
 define AP_SCHEDULER_COPTER_DEFAULT_LOOP_RATE_HZ 200
+
+# QuadPlane's main loop at 200 Hz rather than 300, for the same reason: with
+# Q_FSTRATE_ENABLE the VTOL rate loop runs in the rate thread on core1 (see
+# RPI_UAVFC for the measurement).
+define AP_PLANE_QUADPLANE_DEFAULT_LOOP_RATE_HZ 200
 
 # microSD on the shared SPI1 bus, for logs and files; parameters stay on the
 # XIP flash. Laurel has no dedicated SD card-detect GPIO, so the low-level

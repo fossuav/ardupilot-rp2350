@@ -31,12 +31,17 @@
 #     rate-loop rate; the rate thread's call runs later and wins, but the two
 #     disagree for any non-zero value.
 #
-# The main loop rate is not set here: hwdef.dat lowers Copter's default and
-# leaves other vehicles at theirs.
+# The main loop rate is not set here: hwdef.dat lowers Copter's and
+# QuadPlane's defaults and leaves other vehicles at theirs.
+#
+# Q_FSTRATE_ENABLE and Q_FSTRATE_DIV do for QuadPlane what FSTRATE_ENABLE and
+# FSTRATE_DIV do for Copter; each vehicle ignores the other's.
 INS_FAST_SAMPLE 1
 INS_GYRO_RATE 2
 FSTRATE_DIV 2
 FSTRATE_ENABLE 2
+Q_FSTRATE_DIV 2
+Q_FSTRATE_ENABLE 2
 SERVO_DSHOT_RATE 1
 
 # Single IMU on this board.

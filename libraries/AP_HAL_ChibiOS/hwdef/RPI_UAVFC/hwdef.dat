@@ -336,5 +336,11 @@ define HAL_HNF_MAX_FILTERS 64
 # logging) needs only a modest rate. It was set at the 225 MHz core clock; at
 # 200 MHz with the 100 MHz flash clock the main loop has more headroom, not
 # less. Other vehicles keep their own default, as SCHED_LOOP_RATE in
-# defaults.parm would not: Plane has no rate thread and defaults to 50 Hz.
+# defaults.parm would not: fixed-wing Plane defaults to 50 Hz.
 define AP_SCHEDULER_COPTER_DEFAULT_LOOP_RATE_HZ 200
+
+# QuadPlane's main loop at 200 Hz rather than 300, for the same reason: with
+# Q_FSTRATE_ENABLE the VTOL rate loop runs at 1.6 kHz on core1. Measured on
+# the bench, armed in QSTABILIZE, core0 is 41% busy at 200 Hz against 52% for
+# QuadPlane at 300 Hz without the thread, with no long loops.
+define AP_PLANE_QUADPLANE_DEFAULT_LOOP_RATE_HZ 200
