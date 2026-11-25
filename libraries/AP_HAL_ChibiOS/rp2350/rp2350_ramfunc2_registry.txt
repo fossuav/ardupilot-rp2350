@@ -248,7 +248,6 @@ libraries/AP_Logger/AP_Logger_File.cpp|AP_Logger_File::_WritePrioritisedBlock  #
 libraries/AP_Logger/AP_Logger_Backend.cpp|AP_Logger_Backend::ShouldLog  # 164 B (sram)
 libraries/AP_Logger/LogFile.cpp|AP_Logger::Write_PID  # 160 B (sram)
 libraries/AP_Logger/AP_Logger_Backend.cpp|AP_Logger_Backend::WritePrioritisedBlock  # 114 B (sram)
-ArduCopter/rate_thread.cpp|Copter::rate_controller_log_update  # 76 B (sram)
 libraries/AP_Logger/AP_Logger.cpp|AP_Logger::WriteBlock  # 52 B (sram)
 libraries/AP_Motors/AP_MotorsMulticopter.cpp|AP_MotorsMulticopter::actuator_spin_up_to_ground_idle  # 40 B (sram)
 libraries/AP_Logger/AP_Logger.h|AP_Logger::in_log_download  # 26 B (sram) [inlinable]
