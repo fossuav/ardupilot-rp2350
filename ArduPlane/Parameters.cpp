@@ -1351,7 +1351,7 @@ void Plane::load_parameters(void)
 #if HAL_QUADPLANE_ENABLED
     if (quadplane.enable) {
         // quadplanes needs a higher loop rate
-        AP_Param::set_default_by_name("SCHED_LOOP_RATE", 300);
+        AP_Param::set_default_by_name("SCHED_LOOP_RATE", AP_PLANE_QUADPLANE_DEFAULT_LOOP_RATE_HZ);
     }
 #endif
 

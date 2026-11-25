@@ -217,6 +217,12 @@
 #define AP_PLANE_TAILSITTER_ENABLED HAL_QUADPLANE_ENABLED
 #endif //  AP_PLANE_TAILSITTER_ENABLED
 
+// the main loop rate a QuadPlane defaults to; a board that runs the VTOL rate
+// controller in the rate thread can lower it, as Copter's does
+#ifndef AP_PLANE_QUADPLANE_DEFAULT_LOOP_RATE_HZ
+#define AP_PLANE_QUADPLANE_DEFAULT_LOOP_RATE_HZ 300
+#endif
+
 //////////////////////////////////////////////////////////////////////////////
 //  EKF Failsafe
 #ifndef FS_EKF_THRESHOLD_DEFAULT
