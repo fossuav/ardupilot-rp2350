@@ -40,9 +40,8 @@ ArduCopter/mode.cpp|Copter::update_flight_mode  # 68 B (sram)
 ArduCopter/motors.cpp|Copter::motors_output  # 252 B (sram)
 ArduCopter/motors.cpp|Copter::motors_output_main  # 18 B (sram)
 ArduCopter/precision_landing.cpp|Copter::update_precland  # 56 B (sram)
-ArduCopter/rate_thread.cpp|Copter::rate_controller_thread  # 1356 B (sram)
-ArduCopter/rate_thread.cpp|Copter::rate_controller_filter_update  # 38 B (sram)
-ArduCopter/rate_thread.cpp|Copter::update_dynamic_notch_at_specified_rate_main  # 16 B (sram)
+libraries/AP_Vehicle/rate_thread.cpp|AP_Vehicle::rate_controller_thread  # 1356 B (sram)
+libraries/AP_Vehicle/rate_thread.cpp|AP_Vehicle::rate_controller_filter_update  # 38 B (sram)
 # NOTE: input_euler_angle_roll_pitch_euler_rate_yaw_rad, attitude_controller_run_quat,
 # thrust_heading_rotation_angles, update_ang_vel_target_from_att_error moved to Scratch X
 # (rp2350_scratchx_registry.txt) -- core0-dedicated SRAM8 for zero-contention fetches.
