@@ -24,7 +24,12 @@
 
 extern const AP_HAL::HAL& hal;
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS
+// prints from the IMU bus thread for each dropped sample, which can block on the console
+#define FAST_RATE_BUFFER_DEBUG 0
+
+#if !FAST_RATE_BUFFER_DEBUG
+#define debug(fmt, args ...)
+#elif CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS
 // hal.console can be accessed from bus threads on ChibiOS
 #define debug(fmt, args ...)  do {hal.console->printf("IMU: " fmt "\n", ## args); } while(0)
 #else
