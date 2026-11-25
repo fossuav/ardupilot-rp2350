@@ -62,7 +62,7 @@ void rp2350_perf_report(void)
     auto &ins = AP::ins();
     uint32_t rate_hz = ins.get_raw_gyro_rate_hz();
 #if AP_INERTIALSENSOR_FAST_SAMPLE_WINDOW_ENABLED
-    // the rate thread and its decimation only exist in copter
+    // the rate thread's decimation, 1 when no rate thread runs
     rate_hz /= ins.get_rate_decimation();
 #endif  // AP_INERTIALSENSOR_FAST_SAMPLE_WINDOW_ENABLED
 
