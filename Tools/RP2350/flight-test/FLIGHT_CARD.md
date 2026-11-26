@@ -66,14 +66,14 @@ an `.apj` from a ground station is untested on this port.
 | Firmware | `flight/` | `flight/` | `profile/` |
 | `SCR_ENABLE` | 0 | 1 | 0 |
 | `SCR_DEBUG_OPTS` | 0 | 8 | 0 |
-| `SERVO5_FUNCTION` | as found | 94 | as found |
+| `SERVO8_FUNCTION` | as found | 94 | as found |
 | `APM/scripts` | - | `LED_roll_cycle.lua` only | - |
 
 On every flight: `BRD_IDLE_STATS` 1, `LOG_BITMASK` 442366, `OSD_TYPE` 5.
 Leave `LOG_FILE_BUFSIZE` unset: a stored value cannot be unset over
 MAVLink. Reboot after changing any of these.
 
-`SERVO5_FUNCTION` as found: `________`
+`SERVO8_FUNCTION` as found: `________`
 
 ## Props-off check, after the first flash
 
@@ -120,7 +120,7 @@ Log: `____` Pack: `____` Start/end V: `____ / ____`
 ## Flight 3: RAM profile
 
 Flash `profile/`, set `SCR_ENABLE` 0, `SCR_DEBUG_OPTS` 0 and
-`SERVO5_FUNCTION` as found, and reboot. The sampler records only while
+`SERVO8_FUNCTION` as found, and reboot. The sampler records only while
 armed, so ground time does not dilute it.
 
 - [ ] Settings checked, rebooted
@@ -164,6 +164,6 @@ Log: `____` Pack: `____` Start/end V: `____ / ____`
 
 - Keep together: three logs, `pcprof0.txt`, `pcprof.txt`, both `.elf`
   files, and this card's notes.
-- Restore the quad: `SCR_ENABLE` 0, `SCR_DEBUG_OPTS` 0, `SERVO5_FUNCTION`
+- Restore the quad: `SCR_ENABLE` 0, `SCR_DEBUG_OPTS` 0, `SERVO8_FUNCTION`
   as found, remove `LED_roll_cycle.lua`.
 - Drop the flight-test commits from the branch before a release.
