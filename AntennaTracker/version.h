@@ -6,7 +6,7 @@
 
 #include "ap_version.h"
 
-#define THISFIRMWARE "AntennaTracker V4.8.0-dev"
+#define THISFIRMWARE "AntennaTracker V4.8.0-rp2350-alpha2"
 
 // the following line is parsed by the autotest scripts
 #define FIRMWARE_VERSION 4,8,0,FIRMWARE_VERSION_TYPE_DEV
