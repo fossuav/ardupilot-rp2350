@@ -231,6 +231,7 @@ libraries/Filter/HarmonicNotchFilter.cpp|HarmonicNotchFilter<Vector3<float>>::se
 # plus ~4% in veneers to the SRAM callees; linear_interpolate fades a notch
 # below its minimum frequency, so it runs whenever the motors are near idle.
 libraries/Filter/NotchFilter.cpp|NotchFilter<Vector3<float>>::init_with_A_and_Q  # 356 B (sram)
+libraries/Filter/NotchFilter.cpp|calculate_sinf_cosf  # 244 B (sram)
 libraries/AP_Math/AP_Math.cpp|linear_interpolate  # 82 B (sram)
 libraries/Filter/HarmonicNotchFilter.cpp|HarmonicNotchFilter<Vector3<float>>::init  # 204 B (sram)
 libraries/AP_InertialSensor/AP_InertialSensor.cpp|AP_InertialSensor::HarmonicNotch::update_frequencies_hz  # 34 B (sram)
