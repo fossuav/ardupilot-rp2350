@@ -8,6 +8,14 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
 
 ## Open work
 
+- Bench the refreshed QuadPlane commits on RPI_UAVFC: the output change
+  from #35395's review (2026-11-26, below) has run only in SITL.
+- #32995 and #35395 both change the rate thread: #32995 its stack size
+  and overrun test in Copter's copy, #35395 where it lives. Whichever
+  merges second has to carry #32995's two changes into
+  `libraries/AP_Vehicle/rate_thread.cpp`, as this branch does; #34436
+  likewise for its notch update rate.
+- Open the dropped-sample print fix as its own upstream PR.
 - Push the ChibiOS pin `f92aa3d2bd` to fossuav/ChibiOS before this branch
   is pushed: CI and every clone fetch it by SHA, and no branch or tag on
   GitHub holds it yet. It does not descend from `7e50cd016f`, so when
@@ -26,8 +34,8 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   divider has not run in flight: the quad uses MSP DisplayPort
   (`OSD_TYPE` 5), and the PIO OSD (`OSD_TYPE` 6) needs a board with
   analog video.
-- Drop the two local load measurement commits, `35ba09333e` and
-  `69faaeb7ba`, when ArduPilot/ardupilot#33366 merges; they are not for
+- Drop the two local load measurement commits, `265f165bd6` and
+  `96def44796`, when ArduPilot/ardupilot#33366 merges; they are not for
   #32995. They fix an upstream bug: master's `sysStopLoadMeasure()` only
   requests a stop, taken at the next idle entry, so the
   `sysStartLoadMeasure()` straight after it in `Util::thread_info()` does
@@ -82,6 +90,33 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   reporting 0.4-1.4 degrees of spread. Not raised upstream.
 - Log 7 of 2026-10-31 had a radio failsafe on the ground, 37 s after
   disarming. Not investigated.
+
+## 2026-11-26 - QuadPlane's rate thread from #35395
+
+`rp2350-quadplane-rate-thread` is the alpha2 branch, on #32995 at
+`b9db33af08` since 2026-11-25, with ArduPilot/ardupilot#35395 after the
+other follow-up PRs. #35395 moves Copter's rate thread into AP_Vehicle and
+lets QuadPlane run its VTOL rate controller in it, through
+`Q_FSTRATE_ENABLE` and `Q_FSTRATE_DIV`. The branch carries its head,
+`a6159c5891`, except that the moved code keeps what this branch had
+already changed in Copter's: #32995's board-set stack size
+(`AP_RATE_THREAD_STACK_SIZE`, 3072 on these boards against master's 1536)
+and separate-core overrun test, and #34436's notch update rate. The RP2350
+SRAM registry commits sit between #35395's where a commit needs them to
+build, and four local commits follow: QuadPlane's 200 Hz main loop and
+rate thread defaults on RPI_UAVFC and Laurel, their documentation, and
+removing the dropped-sample print that stalled DShot.
+
+The bench numbers in
+`../ardupilot-pr-analysis/32995/bench-2026-11-25-quadplane.md` were taken
+on the version before #35395's review, `488cd840ff`, kept as
+`pre-refresh/rp2350-quadplane-rate-thread-20261126-0846`. The review changed which thread works out the
+outputs: the main loop now runs `calc_pwm()` once a loop and the thread
+only sends them, and an ESC calibration hands the motors back when
+QSTABILIZE ends. Both have run only in SITL. QuadPlane has not flown on
+the port.
+
+Every new commit builds Copter and Plane for RPI_UAVFC.
 
 ## 2026-11-07 - an Auto mission on the alpha2 branch
 

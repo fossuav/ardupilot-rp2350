@@ -146,7 +146,7 @@ The bootloaders are prebuilt in `Tools/bootloaders/`, and the firmware build emb
 
 ## What Is Included
 
-The branch is ArduPilot master as of 2026-10-24 with the RP2350 port and the fixes below on top. All of them are open pull requests to ArduPilot except the entry marked local, which carries a fix from an open pull request in the form the port needs. Releases are built by `Tools/RP2350/build_release.sh`; [Tools/RP2350/README.md](Tools/RP2350/README.md) describes how the branch and its releases are kept.
+The branch is ArduPilot master as of 2026-11-18 with the RP2350 port and the fixes below on top. All of them are open pull requests to ArduPilot except the entries marked local, each of which says where it is headed. Releases are built by `Tools/RP2350/build_release.sh`; [Tools/RP2350/README.md](Tools/RP2350/README.md) describes how the branch and its releases are kept.
 
 ### The port
 
@@ -170,6 +170,9 @@ The branch is ArduPilot master as of 2026-10-24 with the RP2350 port and the fix
 - DPS280/310/368 Poll Rate to Match the 32 Hz Sensor ODR ([#33055](https://github.com/ArduPilot/ardupilot/pull/33055))
 - ICM-56686 Gyro UI Low-pass for Fast Sampling ([#34603](https://github.com/ArduPilot/ardupilot/pull/34603))
 - Honour the Harmonic Notch Loop Rate Option in the Rate Thread ([#34436](https://github.com/ArduPilot/ardupilot/pull/34436))
+- QuadPlane's VTOL Rate Controller in the Fast Rate Thread, with Copter's Rate Thread Moved into AP_Vehicle ([#35395](https://github.com/ArduPilot/ardupilot/pull/35395)) - the moved code keeps the RP2350 port's board-set stack size and separate-core overrun test, and #34436's notch update rate
+- QuadPlane's rate thread on by default on RPI_UAVFC and Laurel (`Q_FSTRATE_ENABLE` 2, `Q_FSTRATE_DIV` 2), with a 200 Hz QuadPlane main loop - local, headed for a pull request once #35395 merges
+- No Console Print from the IMU Thread for Each Dropped Rate Thread Sample - local, headed for its own pull request; on RP2350 the print could stall DShot output
 
 ### Ground station and OSD
 
