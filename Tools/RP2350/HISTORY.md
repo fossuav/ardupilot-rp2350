@@ -10,7 +10,10 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
 
 - Fly Copter on this branch before an alpha2 release: its rate thread now
   runs from AP_Vehicle (#35395, 2026-11-26 below), which has run only in
-  SITL. Check `RTDT` and the "Rate CPU" message in the first log.
+  SITL. Check `RTDT` and the "Rate CPU" message in the first log, and
+  #35358's notch on the same flight: its attenuation, from the batch
+  sampler's spectra before and after the filters, has not been looked at
+  in the air.
 - QuadPlane's rate thread stalls 3-4 ms within 0.15 s after disarm, before
   and after #35395's review (bench note 2026-11-26). Disarmed, so harmless
   as it stands; not investigated, and not looked for on Copter.
@@ -95,6 +98,20 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   reporting 0.4-1.4 degrees of spread. Not raised upstream.
 - Log 7 of 2026-10-31 had a radio failsafe on the ground, 37 s after
   disarming. Not investigated.
+
+## 2026-11-26 - the notch's sine and cosine without libm, #35358
+
+ArduPilot/ardupilot#35358 joins alpha2 after #35395, at its PR head
+`bd5a581d84`. The harmonic notch now computes the sine and cosine of each
+notch it re-centres together, from Cephes' polynomials, instead of
+calling libm's `sinf()` and `cosf()`, which run from flash on the RP2350.
+A local registry commit places its helper, `calculate_sinf_cosf()`, in
+SRAM beside its caller. On the bench on 2026-11-23, Copter with RPM
+notches, it took core1 from 67.3% to 59.8% busy
+(`../ardupilot-pr-analysis/32995/bench-2026-11-23.md`, sections 14 and
+16). Its unit test holds every coefficient within 6e-7 of the exact
+design, and Copter and Plane build with it for every board. Its
+attenuation has not been checked in flight.
 
 ## 2026-11-26 - alpha2 with QuadPlane's rate thread from #35395
 

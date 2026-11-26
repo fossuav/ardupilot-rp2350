@@ -171,6 +171,7 @@ The branch is ArduPilot master as of 2026-11-18 with the RP2350 port and the fix
 - ICM-56686 Gyro UI Low-pass for Fast Sampling ([#34603](https://github.com/ArduPilot/ardupilot/pull/34603))
 - Honour the Harmonic Notch Loop Rate Option in the Rate Thread ([#34436](https://github.com/ArduPilot/ardupilot/pull/34436))
 - QuadPlane's VTOL Rate Controller in the Fast Rate Thread, with Copter's Rate Thread Moved into AP_Vehicle ([#35395](https://github.com/ArduPilot/ardupilot/pull/35395)) - the moved code keeps the RP2350 port's board-set stack size and separate-core overrun test, and #34436's notch update rate
+- Notch Sine and Cosine without libm ([#35358](https://github.com/ArduPilot/ardupilot/pull/35358))
 - QuadPlane's rate thread on by default on RPI_UAVFC and Laurel (`Q_FSTRATE_ENABLE` 2, `Q_FSTRATE_DIV` 2), with a 200 Hz QuadPlane main loop - local, headed for a pull request once #35395 merges
 - No Console Print from the IMU Thread for Each Dropped Rate Thread Sample - local, headed for its own pull request; on RP2350 the print could stall DShot output
 
