@@ -150,7 +150,7 @@ The branch is ArduPilot master as of 2026-11-18 with the RP2350 port and the fix
 
 ### The port
 
-- RP2350 Port ([#32995](https://github.com/ArduPilot/ardupilot/pull/32995)): ChibiOS SMP across both cores with the rate loop on core 1, hardware and PIO UARTs, PWM and PIO DShot with bidirectional DShot, the PIO analog OSD (`OSD_TYPE` 6), parameter storage in flash, the bootloader, and the Pico2, Laurel and RPI_UAVFC boards. It needs the RP2350 ChibiOS port ([ChibiOS#113](https://github.com/ArduPilot/ChibiOS/pull/113)), which the `modules/ChibiOS` submodule carries.
+- RP2350 Port ([#32995](https://github.com/ArduPilot/ardupilot/pull/32995)): ChibiOS SMP across both cores with the rate loop on core 1, hardware and PIO UARTs, PWM and PIO DShot with bidirectional DShot, the PIO analog OSD (`OSD_TYPE` 6), parameter storage in flash, the bootloader, and the Pico2, Laurel and RPI_UAVFC boards. RPI_UAVFC has six servo outputs besides its four motor outputs: the Spare IO pads GP1-GP3 as outputs 5-7, the LED connector as output 8, and with `BRD_ALT_CONFIG` 1 the ESC connector's TEL pin and the DVTX connector's SBUS pin as outputs 9 and 10. It needs the RP2350 ChibiOS port ([ChibiOS#113](https://github.com/ArduPilot/ChibiOS/pull/113)), which the `modules/ChibiOS` submodule carries.
 
 ### microSD and logging
 
@@ -195,6 +195,7 @@ These are the ones that matter when flying. The full list of open work is in the
 - The microSD write rate is limited by the RP2350, so high-rate logging drops messages, more so in position modes. Use the `ISBH`/`ISBD` batch sampler for spectral analysis and check `DSF.Dp` before trusting a logged rate.
 - RPI_UAVFC has no compass; attach one to the GPS connector's I2C bus, and calibrate its motor interference compensation. On a 5 inch quad in Acro, too little compensation turned the compass heading by up to 80 degrees and tripped EKF failsafes. Current-based compensation (`COMPASS_MOTCT` 2) inherits the current input's temperature drift, so calibrate it at the board temperature you fly at and recheck it on a warmer day, or use throttle-based compensation (`COMPASS_MOTCT` 1), which does not read the current input.
 - On RPI_UAVFC the analog OSD and the LED strip share a PIO block, so the LED strip does not work with `OSD_TYPE` 6.
+- On RPI_UAVFC output 8, the LED connector, shares a PWM slice with the buzzer. Give it any function but an LED strip, 0 included, and the buzzer is off; the RCOut banner then ends ", buzzer off".
 
 ## Reporting Problems
 

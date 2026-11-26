@@ -8,6 +8,11 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
 
 ## Open work
 
+- RPI_UAVFC's servo outputs 5-10 and the buzzer's hand-over of its PWM
+  slice have run only on the bench (2026-11-26 below). The release notes
+  for the next alpha must say the LED output moved from 5 to 8: a board
+  that stored `SERVO5_FUNCTION` 120 keeps it, and GP1 then carries the
+  LED signal until it is set to 0.
 - Fly Copter on this branch before an alpha2 release: its rate thread now
   runs from AP_Vehicle (#35395, 2026-11-26 below), which has run only in
   SITL. Check `RTDT` and the "Rate CPU" message in the first log, and
@@ -98,6 +103,41 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   reporting 0.4-1.4 degrees of spread. Not raised upstream.
 - Log 7 of 2026-10-31 had a radio failsafe on the ground, 37 s after
   disarming. Not investigated.
+
+## 2026-11-26 - alpha2 on #32995 at 6ce2608538: RPI_UAVFC outputs 5-10
+
+The alpha2 branch moves from #32995 at `b9db33af08` to its head
+`6ce2608538`, 18 commits on. Six are the PR's own: Rover's hot code
+placed in SRAM, the placement registry scripts, and waf's
+`--rp2350-relocate`. Twelve add RPI_UAVFC's servo outputs, local to this
+branch until today:
+
+- The Spare IO pads GP1-GP3 are servo outputs 5-7, and the LED connector
+  moves from output 5 to output 8, with `SERVO8_FUNCTION` 120 its default.
+- RP2350 supports alternative configs, with PWM outputs, and
+  `BRD_ALT_CONFIG` 1 makes the ESC connector's TEL pin and the DVTX
+  connector's SBUS pin outputs 9 and 10.
+- Output 8 shares its PWM slice with the buzzer. Given any function but an
+  LED strip, the output has the slice, the buzzer is off, and the RCOut
+  banner ends ", buzzer off".
+- The settings every RP2350 board shares moved out of the three hwdefs
+  into `rp2350_halconf.h`, `rp2350_mcuconf.h` and `PICO2.py`, leaving
+  Copter, Plane and the bootloaders byte-identical.
+
+All of it was bench-tested on an RPI_UAVFC on 2026-11-26
+(`../ardupilot-pr-analysis/32995/bench-2026-11-26-buzzer-outputs.md`):
+each output's pulse read back over SWD, and the buzzer's tone measured
+with the LED connector as a strip, as a servo output and as a script's
+strip. The script's strip left the buzzer at 2.66 kHz instead of 4 kHz;
+the buzzer commit now restarts the slice on the tone alarm's clock. None
+of it has flown.
+
+The 63 commits above the PR replayed onto the new head with two
+conflicts, both where the PR's hwdef cleanup meets the local QuadPlane
+loop rate: the RPI_UAVFC and Laurel hwdefs, and the developer notes'
+loop-rate table. Apart from the six PR commits the tree is the one this
+work had on the old alpha2. RPI_UAVFC, Laurel and Pico2 build Copter,
+Plane and the bootloader.
 
 ## 2026-11-26 - the notch's sine and cosine without libm, #35358
 
