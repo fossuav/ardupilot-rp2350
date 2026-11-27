@@ -13,6 +13,10 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   for the next alpha must say the LED output moved from 5 to 8: a board
   that stored `SERVO5_FUNCTION` 120 keeps it, and GP1 then carries the
   LED signal until it is set to 0.
+- OneShot on RP2350, output 8 at function 0 leaving the buzzer on, and
+  #35410 have run only on the bench (2026-11-27 below). The flight wing
+  carries a OneShot build with `ONESHOT_MASK` on its elevons, so its next
+  flight is their first.
 - Fly Copter on this branch before an alpha2 release: its rate thread now
   runs from AP_Vehicle (#35395, 2026-11-26 below), which has run only in
   SITL. Check `RTDT` and the "Rate CPU" message in the first log, and
@@ -103,6 +107,37 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   reporting 0.4-1.4 degrees of spread. Not raised upstream.
 - Log 7 of 2026-10-31 had a radio failsafe on the ground, 37 s after
   disarming. Not investigated.
+
+## 2026-11-27 - alpha2 on #32995 at 81a63460db: OneShot, with #35410
+
+The alpha2 branch moves from #32995 at `6ce2608538` to `81a63460db`, four
+commits on, and takes #35410 after #35358:
+
+- OneShot and OneShot125 run on RP2350. Its PWM has no one-pulse mode, so
+  a oneshot group's counter runs to TOP 0xFFFF and each trigger writes TOP
+  into it, wrapping it on the next count. Before, OneShot was refused and
+  those outputs fell back to plain PWM: Plane's `ONESHOT_MASK` servos ran
+  at 50 Hz.
+- On RPI_UAVFC, output 8 with function 0 is left out of its group, so the
+  buzzer keeps the PWM slice they share. Before, function 0 took it and
+  the RCOut banner said ", buzzer off".
+- #35410 stops the fast rate loop waiting for each OneShot pulse. With
+  `FSTRATE_ENABLE` and OneShot motors a 1591 Hz rate thread ran at about
+  940 Hz; that is upstream behaviour, which RP2350 met once OneShot ran.
+
+Bench only (`../ardupilot-pr-analysis/32995/bench-2026-11-27-oneshot-buzzer.md`
+and `../ardupilot-pr-analysis/35410/`). The flight wing's `ONESHOT_MASK`
+elevons got 1500 us pulses at the loop rate, and its buzzer plays with
+output 8 at function 0. On the Copter test quad the rate thread held
+1591 Hz with OneShot motors, a dt median of 674 us against 1062 us, and
+the motors got 896 pulses a second against 921 before. The flight wing
+runs a OneShot build from before this refresh, local `a600ccc8d7`, with
+`SCHED_LOOP_RATE` 50.
+
+The 72 commits above the PR replayed onto the new head without conflicts,
+#35410's three after #35358's, and the tree differs from the old alpha2
+only in the five files the new commits change. The old head is local
+branch `pre-rebase/ArduPilot-4.8-rp2350-alpha2-20261127`.
 
 ## 2026-11-26 - alpha2 on #32995 at 6ce2608538: RPI_UAVFC outputs 5-10
 
