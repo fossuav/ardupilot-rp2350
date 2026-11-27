@@ -197,6 +197,7 @@ These are the ones that matter when flying. The full list of open work is in the
 - RPI_UAVFC has no compass; attach one to the GPS connector's I2C bus, and calibrate its motor interference compensation. On a 5 inch quad in Acro, too little compensation turned the compass heading by up to 80 degrees and tripped EKF failsafes. Current-based compensation (`COMPASS_MOTCT` 2) inherits the current input's temperature drift, so calibrate it at the board temperature you fly at and recheck it on a warmer day, or use throttle-based compensation (`COMPASS_MOTCT` 1), which does not read the current input.
 - On RPI_UAVFC the analog OSD and the LED strip share a PIO block, so the LED strip does not work with `OSD_TYPE` 6.
 - On RPI_UAVFC output 8, the LED connector, shares a PWM slice with the buzzer. Give it a servo function and the buzzer is off; the RCOut banner then ends ", buzzer off". With function 0 the output is off and the buzzer works.
+- RPI_UAVFC has pads for a buzzer, not a buzzer: fit one across the BZ and 3V3 pads, + to 3V3. The board switches the BZ pad to ground, so a plain buzzer across BZ and ground never sounds.
 
 ## Reporting Problems
 

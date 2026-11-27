@@ -12,7 +12,8 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
   slice have run only on the bench (2026-11-26 below). The release notes
   for the next alpha must say the LED output moved from 5 to 8: a board
   that stored `SERVO5_FUNCTION` 120 keeps it, and GP1 then carries the
-  LED signal until it is set to 0.
+  LED signal until it is set to 0. The flight wing's powered bench found
+  its ESC lead on the LED connector (2026-11-27, later).
 - OneShot on RP2350, output 8 at function 0 leaving the buzzer on, and
   #35410 have run only on the bench (2026-11-27 below). The flight wing
   carries a OneShot build with `ONESHOT_MASK` on its elevons, so its next
@@ -108,6 +109,30 @@ is in `libraries/AP_HAL_ChibiOS/rp2350/DEVELOPMENT.md` and in
 - Log 7 of 2026-10-31 had a radio failsafe on the ground, 37 s after
   disarming. Not investigated.
 
+## 2026-11-27, later - alpha2 on #32995 at 90fb974382: the buzzer pads
+
+The flight wing, flashed with alpha2 `6d5570e1d2` and powered on the
+bench, showed four faults, none of them in the firmware. The ESC's signal
+lead was on the LED connector, so bidirectional DShot on output 1 never
+had a reply: the PIO state machine restarted about 510 times a second and
+sent a frame every second update. The GPS, one elevon servo and the
+battery reading were put right on the bench as well. The buzzer was
+silent, with no ", buzzer off": it is a module with its own on/off
+switch, and the switch was off.
+
+Before that turned up, the Copter test quad showed GPIO3 toggling at
+4 kHz with 50% duty during a tune and idle otherwise, so the firmware
+drives it. The schematic showed that the board has no buzzer of its own:
+GPIO3 switches a MOSFET on the low side of the BZ pad, and a buzzer goes
+across the BZ and 3V3 pads, + to 3V3. The hwdef said a transducer was
+fitted, taken from another design that fits one; #32995's `90fb974382`
+corrects the hwdef, the board README and the hardware notes, and the
+README here lists it. The entry below said the wing's buzzer plays; that
+was its PWM in the registers only, and it is corrected there.
+
+The 76 commits above the PR replayed onto the new head without
+conflicts. The old head is `6d5570e1d2`.
+
 ## 2026-11-27 - alpha2 on #32995 at 81a63460db: OneShot, with #35410
 
 The alpha2 branch moves from #32995 at `6ce2608538` to `81a63460db`, four
@@ -127,8 +152,9 @@ commits on, and takes #35410 after #35358:
 
 Bench only (`../ardupilot-pr-analysis/32995/bench-2026-11-27-oneshot-buzzer.md`
 and `../ardupilot-pr-analysis/35410/`). The flight wing's `ONESHOT_MASK`
-elevons got 1500 us pulses at the loop rate, and its buzzer plays with
-output 8 at function 0. On the Copter test quad the rate thread held
+elevons got 1500 us pulses at the loop rate, and with output 8 at
+function 0 its buzzer's PWM ran at 4 kHz, seen in the registers only
+(2026-11-27, later). On the Copter test quad the rate thread held
 1591 Hz with OneShot motors, a dt median of 674 us against 1062 us, and
 the motors got 896 pulses a second against 921 before. The flight wing
 runs a OneShot build from before this refresh, local `a600ccc8d7`, with
